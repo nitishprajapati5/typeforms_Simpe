@@ -3,7 +3,6 @@ import {
   Calendar,
   Ellipsis,
   Grid,
-  HardDrive,
   List,
   Pen,
 } from "lucide-react";

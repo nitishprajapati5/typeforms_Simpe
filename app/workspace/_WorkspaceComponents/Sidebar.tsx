@@ -3,20 +3,11 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
-  Calendar,
-  Home,
-  Inbox,
-  Search,
-  Settings,
   Plus,
-  X,
   SearchCode,
-  Space,
   Blocks,
   PlusCircle,
 } from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
 
 type SidebarProps = {
   open: boolean
@@ -26,7 +17,6 @@ type SidebarProps = {
 
 
 export default function CustomSidebar({ open, onClose }: SidebarProps) {
-  const pathname = usePathname()
 
   return (
     <>
