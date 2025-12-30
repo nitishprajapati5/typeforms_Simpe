@@ -8,8 +8,10 @@ import {
   Blocks,
   PlusCircle,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
-type SidebarProps = {
+type SidebarProps =
+ {
   open: boolean
   onClose: () => void
 }
@@ -17,6 +19,8 @@ type SidebarProps = {
 
 
 export default function CustomSidebar({ open, onClose }: SidebarProps) {
+
+  const router = useRouter();
 
   return (
     <>
@@ -40,7 +44,7 @@ export default function CustomSidebar({ open, onClose }: SidebarProps) {
 
         {/* Create Form Button */}
         <div className="p-4 mt-auto">
-          <Button className="w-full flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground py-2">
+          <Button onClick={() => router.push("/form/build")} className="w-full flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground py-2">
             <Plus size={16} />
             Create a new Form
           </Button>

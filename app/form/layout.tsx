@@ -1,13 +1,13 @@
+import { ChevronRight, FormInput } from "lucide-react";
+
 export default function FormLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <header>
-        <h1>Form Layout</h1>
-      </header>
+    <div className="flex flex-col min-h-screen overflow-auto">
+     
       <main>{children}</main>
     </div>
   );
