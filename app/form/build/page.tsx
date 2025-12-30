@@ -113,16 +113,21 @@ export default function FormPage() {
         config: questionConfigMap[type],
       },
     ]);
+    console.log(questions)
   };
 
   const updateQuestionTitle = (id: string, title: string) => {
     setQuestions((prev) =>
       prev.map((q) => (q.id === id ? { ...q, title } : q))
     );
+        console.log(questions)
+
   };
 
   const deleteQuestion = (id: string) => {
     setQuestions((prev) => prev.filter((q) => q.id !== id));
+        console.log(questions)
+
   };
 
   /* ---------------- RENDER ---------------- */
@@ -215,14 +220,16 @@ export default function FormPage() {
                 question.type === "Checkboxes" ||
                 question.type === "Dropdown Menu") && (
                 <div className="space-y-2">
-                  {question.config.options.map((opt: string, i: number) => (
+                  {/* {question.config.options.map((opt: string, i: number) => (
                     <div
                       key={i}
                       className="border rounded px-3 py-2 text-sm text-muted-foreground"
                     >
-                      {opt}
+                      <Input value={opt}  />
                     </div>
-                  ))}
+                  ))} */}
+                  <Button variant="outline">Add Option 1</Button>
+                  <Button variant="outline">Add Option 1</Button>
                 </div>
               )}
 
