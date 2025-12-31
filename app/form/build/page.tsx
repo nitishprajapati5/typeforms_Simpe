@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,11 +30,11 @@ import {
   Bold,
   ItalicIcon,
   UnderlineIcon,
-  AlignJustifyIcon,
   AlignCenter,
   AlignLeftIcon,
   AlignRightIcon,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 /* ---------------- TYPES ---------------- */
 
@@ -43,6 +44,48 @@ type Question = {
   type: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: Record<string, any>;
+};
+
+type Align = "left" | "center" | "right";
+
+type FormConfigurationType = {
+  formId: string;
+  title: {
+    formTitle: string;
+    placeholder: string;
+    isTitleBold: boolean;
+    isTitleItalic: boolean;
+    isTitleUnderline: boolean;
+    TitleAlign: Align;
+  };
+  description: {
+    formDescription: string;
+    placeholder: string;
+    isDescriptionBold: boolean;
+    isDescriptionItalic: boolean;
+    isDescriptionUnderline: boolean;
+    DescriptionAlign: Align;
+  };
+};
+
+const formHeaderConfigurationDetails: FormConfigurationType = {
+  formId: crypto.randomUUID(),
+  title: {
+    formTitle: "My New Form",
+    placeholder: "Form Title",
+    isTitleBold: false,
+    isTitleItalic: false,
+    isTitleUnderline: false,
+    TitleAlign: "left",
+  },
+  description: {
+    formDescription: "",
+    placeholder: "Please enter form description",
+    isDescriptionBold: false,
+    isDescriptionItalic: false,
+    isDescriptionUnderline: false,
+    DescriptionAlign: "left",
+  },
 };
 
 /* ---------------- DATA ---------------- */
@@ -93,7 +136,7 @@ const questionConfigMap: Record<string, any> = {
   "Multiple Choice": {
     options: ["Option 1", "Option 2"],
   },
-  "Checkboxes": {
+  Checkboxes: {
     options: ["Option 1", "Option 2"],
   },
   "Dropdown Menu": {
@@ -108,9 +151,47 @@ export default function FormPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [description, setDescription] = useState("Form Description");
-
+  const [formHeaderConfiguration, setFormHeaderConfiguration] =
+    useState<FormConfigurationType>(formHeaderConfigurationDetails);
   /* ---------------- ACTIONS ---------------- */
 
+  const updateFormChanges = <K extends keyof FormConfigurationType["title"]>(
+    formId: string,
+    key: K,
+    value: FormConfigurationType["title"][K]
+  ) => {
+    setFormHeaderConfiguration((prev) =>
+      prev.formId === formId
+        ? {
+            ...prev,
+            title: {
+              ...prev.title,
+              [key]: value,
+            },
+          }
+        : prev
+    );
+    console.log("After Changes", formHeaderConfiguration);
+  };
+
+  const updateDescriptionFormChanges = <K extends keyof FormConfigurationType["description"]>(
+    formId:string,
+    key:K,
+    value:FormConfigurationType["description"][K]
+  ) => {
+    setFormHeaderConfiguration((prev) => 
+      prev.formId === formId ?{
+        ...prev,
+        description :{
+          ...prev.description,
+          [key]:value
+        }
+      }:prev
+    )
+    console.log("File Description Changes",formHeaderConfiguration)
+  }
+
+  /*
   const addQuestion = (type: string) => {
     setQuestions((prev) => [
       ...prev,
@@ -121,27 +202,21 @@ export default function FormPage() {
         config: questionConfigMap[type],
       },
     ]);
-    console.log(questions)
+    console.log(questions);
   };
 
   const updateQuestionTitle = (id: string, title: string) => {
     setQuestions((prev) =>
       prev.map((q) => (q.id === id ? { ...q, title } : q))
     );
-        console.log(questions)
-
+    console.log(questions);
   };
 
   const deleteQuestion = (id: string) => {
     setQuestions((prev) => prev.filter((q) => q.id !== id));
-        console.log(questions)
-
+    console.log(questions);
   };
-
- 
-
-  /* ---------------- RENDER ---------------- */
-
+*/
   return (
     <div className="w-full overflow-y-auto">
       {/* NAVBAR */}
@@ -158,120 +233,176 @@ export default function FormPage() {
               readOnly
             />
           </div>
-          <Button className="bg-green-900 hover:bg-green-900">
-            Publish
-          </Button>
+          <Button className="bg-green-900 hover:bg-green-900">Publish</Button>
         </header>
       </nav>
 
-      
       {/* BUILDER AREA */}
       <div className="mt-8 flex flex-col items-center gap-6 px-4">
         <div className="w-full flex items-center flex-col justify-start gap-3">
           <Input
-          value={formName}
-          placeholder="Enter your Form Name"
-          onChange={(e) => setFormName(e.target.value)}
-          className="text-2xl font-semibold w-full max-w-4xl"
-        />
-        <textarea 
-          value={description}
-          placeholder="Form Description"
-          onChange={(e) => setDescription(e.target.value)}
-          className="text-md w-full max-w-4xl"
-        />
-        <div className="flex flex-row gap-2"><Bold></Bold> <ItalicIcon/> <UnderlineIcon /> <AlignLeftIcon /> <AlignCenter /> <AlignRightIcon /></div>
-        </div>
-        {/* ADD QUESTION BAR */}
-        
-        <div>
-
-        </div>
-        <div className="w-full max-w-4xl flex gap-3 items-center border-2 border-dashed rounded-md p-4 bg-gray-50">
-          <Input value="Untitled Question" disabled />
-          <Select onValueChange={addQuestion}>
-            <SelectTrigger className="w-72 bg-white">
-              <SelectValue placeholder="Add question type" />
-            </SelectTrigger>
-            <SelectContent>
-              {selectionType.map((group) => (
-                <SelectGroup key={group.type}>
-                  <SelectLabel>{group.type}</SelectLabel>
-                  {group.choices.map((choice) => (
-                    <SelectItem key={choice} value={choice}>
-                      {choice}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* QUESTIONS */}
-        <div className="w-full max-w-4xl space-y-4">
-          {questions.map((question) => (
-            <div
-              key={question.id}
-              className="border rounded-md bg-white p-4 space-y-3"
-            >
-              <div className="flex justify-between items-center gap-3">
-                <Input
-                  value={question.title}
-                  onChange={(e) =>
-                    updateQuestionTitle(question.id, e.target.value)
-                  }
-                  className="font-medium"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => deleteQuestion(question.id)}
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
-              </div>
-
-              {/* PREVIEW */}
-              {question.type === "Single Line Text" && (
-                <Input placeholder={question.config.placeholder} disabled />
+            value={formHeaderConfiguration.title.formTitle}
+            placeholder="Enter your Form Name"
+            onChange={(e) =>
+              updateFormChanges(
+                formHeaderConfiguration.formId,
+                "formTitle",
+                e.target.value
+              )
+            }
+            className={cn(
+              "text-2xl w-full max-w-4xl border-gray-500 focus:border-gray-400",
+              formHeaderConfiguration.title.isTitleBold && "font-bold",
+              formHeaderConfiguration.title.isTitleItalic && "italic",
+              formHeaderConfiguration.title.isTitleUnderline && "underline"
+            )}
+          />
+          <div className="flex flex-row gap-2">
+            <Bold
+              role="button"
+              tabIndex={0}
+              className={cn(
+                "cursor-pointer",
+                formHeaderConfiguration.title.isTitleBold && "bg-amber-100"
               )}
-
-              {question.type === "Multi Line Text/Text Area" && (
-                <textarea
-                  className="w-full border rounded p-2"
-                  rows={question.config.rows}
-                  placeholder={question.config.placeholder}
-                  disabled
-                />
+              onClick={() =>
+                updateFormChanges(
+                  formHeaderConfiguration.formId,
+                  "isTitleBold",
+                  !formHeaderConfiguration.title.isTitleBold
+                )
+              }
+            />{" "}
+            <ItalicIcon
+              role="button"
+              tabIndex={0}
+              className={cn(
+                "cursor-pointer",
+                formHeaderConfiguration.title.isTitleItalic && "bg-amber-100"
               )}
-
-              {(question.type === "Multiple Choice" ||
-                question.type === "Checkboxes" ||
-                question.type === "Dropdown Menu") && (
-                <div className="space-y-2">
-                  {/* {question.config.options.map((opt: string, i: number) => (
-                    <div
-                      key={i}
-                      className="border rounded px-3 py-2 text-sm text-muted-foreground"
-                    >
-                      <Input value={opt}  />
-                    </div>
-                  ))} */}
-                  <Button variant="outline">Add Option 1</Button>
-                  <Button variant="outline">Add Option 1</Button>
-                </div>
+              onClick={() =>
+                updateFormChanges(
+                  formHeaderConfiguration.formId,
+                  "isTitleItalic",
+                  !formHeaderConfiguration.title.isTitleItalic
+                )
+              }
+            />{" "}
+            <UnderlineIcon
+              role="button"
+              tabIndex={0}
+              className={cn(
+                "cursor-pointer",
+                formHeaderConfiguration.title.isTitleUnderline && "bg-amber-100"
               )}
-
-              <div className="text-xs text-muted-foreground">
-                {question.type}
-              </div>
-            </div>
-          ))}
+              onClick={() =>
+                updateFormChanges(
+                  formHeaderConfiguration.formId,
+                  "isTitleUnderline",
+                  !formHeaderConfiguration.title.isTitleUnderline
+                )
+              }
+            />
+            <AlignLeftIcon
+              role="button"
+              tabIndex={0}
+              className={cn(
+                "cursor-pointer",
+                formHeaderConfiguration.title.TitleAlign === "left" &&
+                  "bg-amber-100"
+              )}
+              onClick={() =>
+                updateFormChanges(
+                  formHeaderConfiguration.formId,
+                  "TitleAlign",
+                  "left"
+                )
+              }
+            />
+            <AlignCenter
+              role="button"
+              tabIndex={0}
+              className={cn(
+                "cursor-pointer",
+                formHeaderConfiguration.title.TitleAlign === "center" &&
+                  "bg-amber-100"
+              )}
+              onClick={() =>
+                updateFormChanges(
+                  formHeaderConfiguration.formId,
+                  "TitleAlign",
+                  "center"
+                )
+              }
+            />
+            <AlignRightIcon
+              role="button"
+              tabIndex={0}
+              className={cn(
+                "cursor-pointer",
+                formHeaderConfiguration.title.TitleAlign === "right" &&
+                  "bg-amber-100"
+              )}
+              onClick={() =>
+                updateFormChanges(
+                  formHeaderConfiguration.formId,
+                  "TitleAlign",
+                  "right"
+                )
+              }
+            />
+          </div>
+          <Textarea
+           value={formHeaderConfiguration.description.formDescription}
+            placeholder="Enter your Form Name"
+            onChange={(e) =>
+              updateDescriptionFormChanges(
+                formHeaderConfiguration.formId,
+                "formDescription",
+                e.target.value
+              )
+            }
+            className={cn(
+              "text-2xl w-full max-w-4xl border-gray-500 focus:border-gray-400",
+              formHeaderConfiguration.description.isDescriptionBold && "font-bold",
+              formHeaderConfiguration.description.isDescriptionItalic && "italic",
+              formHeaderConfiguration.description.isDescriptionUnderline && "underline"
+            )} />
+          <div className="flex flex-row gap-2">
+            <Bold  
+            role="button"
+              tabIndex={0}
+              className={cn(
+                "cursor-pointer",
+                formHeaderConfiguration.description.isDescriptionBold && "bg-amber-100"
+              )}
+              onClick={() =>
+                updateDescriptionFormChanges(
+                  formHeaderConfiguration.formId,
+                  "isDescriptionBold",
+                  !formHeaderConfiguration.description.isDescriptionBold
+                )
+              }></Bold>
+            <ItalicIcon role="button"
+              tabIndex={0}
+              className={cn(
+                "cursor-pointer",
+                formHeaderConfiguration.description.isDescriptionItalic && "bg-amber-100"
+              )}
+              onClick={() =>
+                updateDescriptionFormChanges(
+                  formHeaderConfiguration.formId,
+                  "isDescriptionItalic",
+                  !formHeaderConfiguration.description.isDescriptionItalic
+                )
+              } />{" "}
+            
+          </div>
         </div>
+
+        <div></div>
       </div>
 
-      {/* EDIT FORM NAME */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -290,9 +421,7 @@ export default function FormPage() {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button onClick={() => setIsDialogOpen(false)}>
-              Save
-            </Button>
+            <Button onClick={() => setIsDialogOpen(false)}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
