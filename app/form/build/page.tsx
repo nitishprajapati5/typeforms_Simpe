@@ -26,6 +26,13 @@ import {
   FormInput,
   ChevronRight,
   Trash2,
+  Bold,
+  ItalicIcon,
+  UnderlineIcon,
+  AlignJustifyIcon,
+  AlignCenter,
+  AlignLeftIcon,
+  AlignRightIcon,
 } from "lucide-react";
 
 /* ---------------- TYPES ---------------- */
@@ -100,6 +107,7 @@ export default function FormPage() {
   const [formName, setFormName] = useState("My new form");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [description, setDescription] = useState("Form Description");
 
   /* ---------------- ACTIONS ---------------- */
 
@@ -130,6 +138,8 @@ export default function FormPage() {
 
   };
 
+ 
+
   /* ---------------- RENDER ---------------- */
 
   return (
@@ -154,9 +164,29 @@ export default function FormPage() {
         </header>
       </nav>
 
+      
       {/* BUILDER AREA */}
       <div className="mt-8 flex flex-col items-center gap-6 px-4">
+        <div className="w-full flex items-center flex-col justify-start gap-3">
+          <Input
+          value={formName}
+          placeholder="Enter your Form Name"
+          onChange={(e) => setFormName(e.target.value)}
+          className="text-2xl font-semibold w-full max-w-4xl"
+        />
+        <textarea 
+          value={description}
+          placeholder="Form Description"
+          onChange={(e) => setDescription(e.target.value)}
+          className="text-md w-full max-w-4xl"
+        />
+        <div className="flex flex-row gap-2"><Bold></Bold> <ItalicIcon/> <UnderlineIcon /> <AlignLeftIcon /> <AlignCenter /> <AlignRightIcon /></div>
+        </div>
         {/* ADD QUESTION BAR */}
+        
+        <div>
+
+        </div>
         <div className="w-full max-w-4xl flex gap-3 items-center border-2 border-dashed rounded-md p-4 bg-gray-50">
           <Input value="Untitled Question" disabled />
           <Select onValueChange={addQuestion}>
