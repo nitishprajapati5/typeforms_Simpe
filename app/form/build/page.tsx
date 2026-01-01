@@ -240,8 +240,8 @@ const QuestionPreview = ({ question }: { question: Question }) => {
         </SelectTrigger>
         <SelectContent>
           {config.options.map((option: string, idx: number) => (
-            <SelectItem key={idx} value={option}>
-              {option}
+            <SelectItem  key={idx} value={option && option.trim() != "" ? option : `option-${idx}`}>
+              {option || "Please enter the Option"}
             </SelectItem>
           ))}
         </SelectContent>
@@ -271,6 +271,10 @@ export default function FormPage() {
   const [newQuestionTitle, setNewQuestionTitle] = useState("");
   const [selectedTypeOfQuestion, setSelectedTypeOfQuestion] = useState("");
 
+
+  const handlePublishEvent = () => {
+    console.log(questions)
+  }
 
   const updateFormChanges = <K extends keyof FormConfigurationType["title"]>(
     formId: string,
@@ -327,6 +331,7 @@ export default function FormPage() {
     setQuestions((prev) => [...prev, newQuestion]);
     setNewQuestionTitle("");
     setSelectedTypeOfQuestion("");
+    console.log("Question's Log",questions)
   };
 
   const updateQuestionTitle = (id: string, title: string) => {
@@ -383,7 +388,7 @@ export default function FormPage() {
               readOnly
             />
           </div>
-          <Button className="bg-green-700 hover:bg-green-800">Publish</Button>
+          <Button className="bg-green-700 hover:bg-green-800" onClickCapture={handlePublishEvent}>Publish</Button>
         </header>
       </nav>
 
@@ -413,9 +418,10 @@ export default function FormPage() {
             <div className="flex flex-row gap-2">
               <Bold
                 role="button"
+                size={24}
                 tabIndex={0}
                 className={cn(
-                  "cursor-pointer p-2 rounded hover:bg-gray-100",
+                  "cursor-pointer p-1 rounded hover:bg-gray-100",
                   formHeaderConfiguration.title.isTitleBold && "bg-amber-100"
                 )}
                 onClick={() =>
@@ -430,7 +436,7 @@ export default function FormPage() {
                 role="button"
                 tabIndex={0}
                 className={cn(
-                  "cursor-pointer p-2 rounded hover:bg-gray-100",
+                  "cursor-pointer p-1 rounded hover:bg-gray-100",
                   formHeaderConfiguration.title.isTitleItalic && "bg-amber-100"
                 )}
                 onClick={() =>
@@ -445,7 +451,7 @@ export default function FormPage() {
                 role="button"
                 tabIndex={0}
                 className={cn(
-                  "cursor-pointer p-2 rounded hover:bg-gray-100",
+                  "cursor-pointer p-1 rounded hover:bg-gray-100",
                   formHeaderConfiguration.title.isTitleUnderline && "bg-amber-100"
                 )}
                 onClick={() =>
@@ -461,7 +467,7 @@ export default function FormPage() {
                 role="button"
                 tabIndex={0}
                 className={cn(
-                  "cursor-pointer p-2 rounded hover:bg-gray-100",
+                  "cursor-pointer p-1 rounded hover:bg-gray-100",
                   formHeaderConfiguration.title.TitleAlign === "left" &&
                     "bg-amber-100"
                 )}
@@ -477,7 +483,7 @@ export default function FormPage() {
                 role="button"
                 tabIndex={0}
                 className={cn(
-                  "cursor-pointer p-2 rounded hover:bg-gray-100",
+                  "cursor-pointer p-1 rounded hover:bg-gray-100",
                   formHeaderConfiguration.title.TitleAlign === "center" &&
                     "bg-amber-100"
                 )}
@@ -493,7 +499,7 @@ export default function FormPage() {
                 role="button"
                 tabIndex={0}
                 className={cn(
-                  "cursor-pointer p-2 rounded hover:bg-gray-100",
+                  "cursor-pointer p-1 rounded hover:bg-gray-100",
                   formHeaderConfiguration.title.TitleAlign === "right" &&
                     "bg-amber-100"
                 )}
@@ -533,7 +539,7 @@ export default function FormPage() {
                 role="button"
                 tabIndex={0}
                 className={cn(
-                  "cursor-pointer p-2 rounded hover:bg-gray-100",
+                  "cursor-pointer p-1 rounded hover:bg-gray-100",
                   formHeaderConfiguration.description.isDescriptionBold &&
                     "bg-amber-100"
                 )}
@@ -549,7 +555,7 @@ export default function FormPage() {
                 role="button"
                 tabIndex={0}
                 className={cn(
-                  "cursor-pointer p-2 rounded hover:bg-gray-100",
+                  "cursor-pointer p-1 rounded hover:bg-gray-100",
                   formHeaderConfiguration.description.isDescriptionItalic &&
                     "bg-amber-100"
                 )}
@@ -565,7 +571,7 @@ export default function FormPage() {
                 role="button"
                 tabIndex={0}
                 className={cn(
-                  "cursor-pointer p-2 rounded hover:bg-gray-100",
+                  "cursor-pointer p-1 rounded hover:bg-gray-100",
                   formHeaderConfiguration.description.isDescriptionUnderline &&
                     "bg-amber-100"
                 )}
@@ -668,6 +674,7 @@ export default function FormPage() {
                     onCheckedChange={(checked: boolean) =>
                       updateQuestionRequired(question.id, checked as boolean)
                     }
+                    className="border-2 border-black"
                   />
                   <Label htmlFor={`required-${question.id}`} className="text-sm">
                     Required
