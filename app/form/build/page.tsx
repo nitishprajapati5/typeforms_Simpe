@@ -37,6 +37,11 @@ import {
   PlusCircle,
   Copy,
   GripVertical,
+  Settings2Icon,
+  EyeIcon,
+  PencilIcon,
+  Share,
+  SendHorizonalIcon,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -388,7 +393,12 @@ export default function FormPage() {
               readOnly
             />
           </div>
-          <Button className="bg-green-700 hover:bg-green-800" onClickCapture={handlePublishEvent}>Publish</Button>
+          <div className="flex gap-2 items-center">
+            <SendHorizonalIcon className="cursor-pointer"  onClickCapture={handlePublishEvent} />  
+            <Settings2Icon className="cursor-pointer"  size={20}/>
+            <EyeIcon className="cursor-pointer"  size={20} />
+            <PencilIcon className="cursor-pointer"  size={20}/>
+          </div>
         </header>
       </nav>
 
