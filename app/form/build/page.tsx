@@ -20,6 +20,7 @@ import { QuestionCard } from "./_Components/QuestionCard";
 import { AddQuestionCard } from "./_Components/AddQuestionCard";
 import { DesignSheet } from './_Components/DesignSheet';
 import { useFormBuilder } from "./hooks/useBuilder";
+import { DesignSettingSheet } from "./_Components/DesignSettingSheet";
 
 export default function FormPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -50,6 +51,8 @@ export default function FormPage() {
     updateDesignConfiguration,
     handlePublishEvent,
     handleDesignChanges,
+    isSettingSheetOpen,
+    setSettingSheetOpen
   } = useFormBuilder();
 
   return (
@@ -59,6 +62,7 @@ export default function FormPage() {
         onFormNameClick={() => setIsDialogOpen(true)}
         onPublish={handlePublishEvent}
         onDesignClick={() => setIsSheetOpen(!isSheetOpen)}
+        onSettingClick={() => setSettingSheetOpen(!isSettingSheetOpen)}
       />
 
       <div className="mt-8 flex flex-col items-center gap-6 px-4 pb-20">
@@ -123,6 +127,11 @@ export default function FormPage() {
         onThemeSelect={setSelectedTheme}
         onShadeSelect={setSelectedShade}
         onSave={handleDesignChanges}
+      />
+
+      <DesignSettingSheet 
+        isOpen = {isSettingSheetOpen}
+        onOpenChange={setSettingSheetOpen}
       />
     </div>
   );

@@ -8,6 +8,7 @@ interface FormNavbarProps {
   onFormNameClick: () => void;
   onPublish: () => void;
   onDesignClick: () => void;
+  onSettingClick:() => void
 }
 
 export const FormNavbar = ({
@@ -15,6 +16,7 @@ export const FormNavbar = ({
   onFormNameClick,
   onPublish,
   onDesignClick,
+  onSettingClick
 }: FormNavbarProps) => {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background">
@@ -34,7 +36,7 @@ export const FormNavbar = ({
           <Button className="cursor-pointer bg-green-800" onClick={onPublish}>
             Publish
           </Button>
-          <Settings2Icon className="cursor-pointer" size={20} />
+          <Settings2Icon onClick={onSettingClick} className="cursor-pointer" size={20} />
           <EyeIcon className="cursor-pointer" size={20} />
           <PencilIcon onClick={onDesignClick} className="cursor-pointer" size={20} />
         </div>

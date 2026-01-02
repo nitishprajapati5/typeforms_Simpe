@@ -16,6 +16,7 @@ export const useFormBuilder = () => {
   const [selectedTypeOfQuestion, setSelectedTypeOfQuestion] = useState("");
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(themes[0]);
   const [selectedShade, setSelectedShade] = useState<string | null>(themes[0].shades[0]);
+  const [isSettingSheetOpen,setSettingSheetOpen] = useState(false)
 
   const updateFormChanges = <K extends keyof FormConfigurationType["title"]>(
     formId: string,
@@ -151,5 +152,7 @@ export const useFormBuilder = () => {
     updateDesignConfiguration,
     handlePublishEvent,
     handleDesignChanges,
+    isSettingSheetOpen,
+    setSettingSheetOpen
   };
 };
