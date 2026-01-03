@@ -32,12 +32,11 @@ export const FormNavbar = ({
       <header className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3 min-w-0">
           <FormInput className="h-5 w-5 shrink-0" />
-          <span className="hidden sm:inline font-medium">Form Builder</span>
+          <span className="hidden font-medium">Form Builder</span>
           <ChevronRight className="hidden sm:block h-4 w-4 text-muted-foreground" />
           <Input
             className="border-0 bg-transparent p-0 text-xl font-semibold focus-visible:ring-0 truncate"
-            value={formName}
-            onClick={onFormNameClick}
+            value="Create New Form"
             readOnly
           />
         </div>

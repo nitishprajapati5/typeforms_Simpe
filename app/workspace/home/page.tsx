@@ -1,3 +1,4 @@
+"use client";
 import {
   ArrowDownAZIcon,
   Calendar,
@@ -13,18 +14,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
+import { useWorkSpaceBuilder } from "../hooks/useWorkSpaceBuilder";
+import WorkSpaceNameChangeDialog from "../_WorkspaceComponents/Dialog";
 
 export default function Home() {
+  const { isDialogOpen, setDialogOpen,workSpaceName,setWorkSpaceName } = useWorkSpaceBuilder();
+
   return (
     <div className="min-h-screen flex flex-col p-4">
       <div className="flex flex-row items-center gap-2 justify-between">
         <div className="flex flex-row items-center gap-2">
           <div>
-            <h1 className="text-2xl font-bold">WorkSpace Name</h1>
+            <h1 className="text-2xl font-bold">{workSpaceName || "Work Space Name"}</h1>
             <p className="text-gray-600">Create and manage your survey forms</p>
           </div>
           <div>
-            <Ellipsis />
+            <Ellipsis onClick={() => setDialogOpen(!isDialogOpen)} />
           </div>
         </div>
 
@@ -57,8 +62,16 @@ export default function Home() {
       </div>
 
       <div className="flex flex-1 items-center justify-center">
-        <Image src="/empty-box.svg" alt="Emplty Box"  height={400} width={400}/>
+        <Image src="/empty-box.svg" alt="Emplty Box" height={400} width={400} />
       </div>
+
+      <WorkSpaceNameChangeDialog
+        isOpen={isDialogOpen}
+        setDialogOpen={setDialogOpen}
+        setWorkSpaceName={setWorkSpaceName}
+        workSpaceName={workSpaceName}
+
+      />
     </div>
   );
 }
