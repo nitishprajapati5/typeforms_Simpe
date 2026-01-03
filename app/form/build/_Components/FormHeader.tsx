@@ -37,7 +37,6 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
           )}
         />
 
-        {/* Title Formatting Controls */}
         <div className="flex flex-row gap-2">
           <Bold
             role="button"

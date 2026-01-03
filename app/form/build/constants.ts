@@ -1,5 +1,5 @@
 // constants.ts
-import { FormConfigurationType,FormDesignConfiguration } from "./types";
+import { FormConfigurationType,FormDesignConfiguration, FormSettingsConfiguration } from "./types";
 export const FONT_AND_SIZE_SETTINGS = {
   Fonts: ["Roboto", "Sans", "Monteserrat"],
   Size: [12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
@@ -44,3 +44,12 @@ export const INITIAL_DESIGN_CONFIG: FormDesignConfiguration = {
     background: "#fffff",
   },
 };
+
+export const INITIAL_FORM_SETTINGS:FormSettingsConfiguration = {
+  shuffleQuestionOrder:false,
+  showProgressBar:false,
+  responseConfirmationMessage:"Your Response have been recorded",
+  showLinkToSubmitAnotherResponse:false,
+  requiredSignIn:false,
+  limitResponseToOne:false
+} 

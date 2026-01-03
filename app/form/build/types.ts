@@ -60,5 +60,14 @@ export interface FormDesignConfiguration {
   };
 }
 
+export interface FormSettingsConfiguration {
+  shuffleQuestionOrder:boolean,
+  showProgressBar:boolean,
+  responseConfirmationMessage:string | "Your Message have been recorded",
+  showLinkToSubmitAnotherResponse:boolean,
+  requiredSignIn:boolean,
+  limitResponseToOne:boolean
+}
+
 export type DesignKey = "fontSelected" | "size";
 export type DesignType = "headerDesign" | "questionDesign" | "textDesign";

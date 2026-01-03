@@ -1,14 +1,21 @@
 // components/FormNavbar.tsx
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormInput, ChevronRight, Settings2Icon, EyeIcon, PencilIcon } from "lucide-react";
+import {
+  FormInput,
+  ChevronRight,
+  Settings2Icon,
+  EyeIcon,
+  PencilIcon,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface FormNavbarProps {
   formName: string;
   onFormNameClick: () => void;
   onPublish: () => void;
   onDesignClick: () => void;
-  onSettingClick:() => void
+  onSettingClick: () => void;
 }
 
 export const FormNavbar = ({
@@ -16,8 +23,10 @@ export const FormNavbar = ({
   onFormNameClick,
   onPublish,
   onDesignClick,
-  onSettingClick
+  onSettingClick,
 }: FormNavbarProps) => {
+  const router = useRouter();
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background">
       <header className="flex items-center justify-between px-4 py-3">
@@ -36,9 +45,21 @@ export const FormNavbar = ({
           <Button className="cursor-pointer bg-green-800" onClick={onPublish}>
             Publish
           </Button>
-          <Settings2Icon onClick={onSettingClick} className="cursor-pointer" size={20} />
-          <EyeIcon className="cursor-pointer" size={20} />
-          <PencilIcon onClick={onDesignClick} className="cursor-pointer" size={20} />
+          <Settings2Icon
+            onClick={onSettingClick}
+            className="cursor-pointer"
+            size={20}
+          />
+          <EyeIcon
+            onClick={() => router.push("/form/preview")}
+            className="cursor-pointer"
+            size={20}
+          />
+          <PencilIcon
+            onClick={onDesignClick}
+            className="cursor-pointer"
+            size={20}
+          />
         </div>
       </header>
     </nav>

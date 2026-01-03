@@ -52,7 +52,9 @@ export default function FormPage() {
     handlePublishEvent,
     handleDesignChanges,
     isSettingSheetOpen,
-    setSettingSheetOpen
+    setSettingSheetOpen,
+    updateFormSettingChanges,
+    formSettingConfiguration
   } = useFormBuilder();
 
   return (
@@ -132,6 +134,8 @@ export default function FormPage() {
       <DesignSettingSheet 
         isOpen = {isSettingSheetOpen}
         onOpenChange={setSettingSheetOpen}
+        onUpdateFormSettings={updateFormSettingChanges}
+        intialFormState={formSettingConfiguration}
       />
     </div>
   );

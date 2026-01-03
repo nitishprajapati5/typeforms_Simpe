@@ -1,9 +1,19 @@
 // hooks/useFormBuilder.ts
 import { useState } from "react";
-import { Question, FormConfigurationType, FormDesignConfiguration, Theme, DesignType } from '../types';
-import { INITIAL_FORM_HEADER_CONFIG, INITIAL_DESIGN_CONFIG } from '../constants';
-import { questionConfigMap } from '../_Utils/utils';
-import { themes } from '../_Utils/utils';
+import {
+  Question,
+  FormConfigurationType,
+  FormDesignConfiguration,
+  Theme,
+  DesignType,
+} from "../types";
+import {
+  INITIAL_FORM_HEADER_CONFIG,
+  INITIAL_DESIGN_CONFIG,
+  INITIAL_FORM_SETTINGS,
+} from "../constants";
+import { questionConfigMap } from "../_Utils/utils";
+import { themes } from "../_Utils/utils";
 
 export const useFormBuilder = () => {
   const [formName, setFormName] = useState("My new form");
@@ -15,8 +25,13 @@ export const useFormBuilder = () => {
   const [newQuestionTitle, setNewQuestionTitle] = useState("");
   const [selectedTypeOfQuestion, setSelectedTypeOfQuestion] = useState("");
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(themes[0]);
-  const [selectedShade, setSelectedShade] = useState<string | null>(themes[0].shades[0]);
-  const [isSettingSheetOpen,setSettingSheetOpen] = useState(false)
+  const [selectedShade, setSelectedShade] = useState<string | null>(
+    themes[0].shades[0]
+  );
+  const [isSettingSheetOpen, setSettingSheetOpen] = useState(false);
+  const [formSettingConfiguration, setFormSettingConfiguration] = useState(
+    INITIAL_FORM_SETTINGS
+  );
 
   const updateFormChanges = <K extends keyof FormConfigurationType["title"]>(
     formId: string,
@@ -36,7 +51,9 @@ export const useFormBuilder = () => {
     );
   };
 
-  const updateDescriptionFormChanges = <K extends keyof FormConfigurationType["description"]>(
+  const updateDescriptionFormChanges = <
+    K extends keyof FormConfigurationType["description"]
+  >(
     formId: string,
     key: K,
     value: FormConfigurationType["description"][K]
@@ -74,11 +91,15 @@ export const useFormBuilder = () => {
   };
 
   const updateQuestionTitle = (id: string, title: string) => {
-    setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, title } : q)));
+    setQuestions((prev) =>
+      prev.map((q) => (q.id === id ? { ...q, title } : q))
+    );
   };
 
   const updateQuestionRequired = (id: string, required: boolean) => {
-    setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, required } : q)));
+    setQuestions((prev) =>
+      prev.map((q) => (q.id === id ? { ...q, required } : q))
+    );
   };
 
   const deleteQuestion = (id: string) => {
@@ -99,7 +120,9 @@ export const useFormBuilder = () => {
 
   const updateQuestionOptions = (id: string, options: string[]) => {
     setQuestions((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, config: { ...q.config, options } } : q))
+      prev.map((q) =>
+        q.id === id ? { ...q, config: { ...q.config, options } } : q
+      )
     );
   };
 
@@ -117,6 +140,17 @@ export const useFormBuilder = () => {
         ...(sizeValue !== undefined && { size: sizeValue }),
       },
     }));
+  };
+
+  const updateFormSettingChanges = 
+    (key: "shuffleQuestionOrder" | "showProgressBar" | "responseConfirmationMessage" | "showLinkToSubmitAnotherResponse" | "requiredSignIn" | "limitResponseToOne", 
+    value: boolean | string) => {
+    setFormSettingConfiguration((prev) => ({
+      ...prev,
+      [key]: value, 
+    }));
+
+    console.log(formSettingConfiguration)
   };
 
   const handlePublishEvent = () => {
@@ -153,6 +187,9 @@ export const useFormBuilder = () => {
     handlePublishEvent,
     handleDesignChanges,
     isSettingSheetOpen,
-    setSettingSheetOpen
+    setSettingSheetOpen,
+    updateFormSettingChanges,
+    setFormSettingConfiguration,
+    formSettingConfiguration,
   };
 };
