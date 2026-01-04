@@ -1,11 +1,13 @@
 import {betterAuth} from "better-auth"
 import {prismaAdapter} from "better-auth/adapters/prisma"
-import prisma from "../app/_DatabaseConfiguration/dbConfig"
+// import { PrismaClient } from "@prisma/client"
+// import prisma from "../app/_DatabaseConfiguration/dbConfig"
+import prisma from "@/app/_DatabaseConfiguration/dbConfig"
 
 
 export const auth = betterAuth({
     database:prismaAdapter(prisma,{
-        provider:"mongodb"
+        provider:"mysql"
     }),
     emailAndPassword:{
         enabled:true
@@ -18,6 +20,7 @@ export const auth = betterAuth({
     },
     session:{
         expiresIn:60*60*24*1
-    }
-    
+    },
+    trustedOrigins:["http://localhost:3000"],
+ 
 })

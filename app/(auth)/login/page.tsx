@@ -3,57 +3,80 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { login } from "../_ServerActions/actions";
 import { useRouter } from "next/navigation";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { Loader2 } from "lucide-react";
 
 export default function Login() {
-  const router = useRouter();
+  const router = useRouter()
+  const [state, formAction] = useActionState(login, { error: undefined,success:false });
+  const {pending,} = useFormStatus()
+
   return (
-    <div className="flex flex-col w-1/2 space-y-4">
-      <h1 className="font-bold text-2xl">Login</h1>
-      <label htmlFor="email" className="text-sm font-medium">
-        Email
-      </label>
-      <Input
-        id="email"
-        placeholder="Email"
-        className="border-2 border-gray-300 rounded-md  transition-colors duration-300"
-      />
+    <form action={formAction} className="w-1/2 justify-center items-center">
+      <div className="flex flex-col space-y-4">
+        <h1 className="font-bold text-2xl">Login</h1>
 
-      <label htmlFor="password" className="text-sm font-medium">
-        Password
-      </label>
-      <Input
-        id="password"
-        placeholder="Password"
-        type="password"
-        className="border-2 border-gray-300 rounded-md  transition-colors duration-300"
-      />
-
-      <Button className="mt-4 cursor-pointer">Login</Button>
-      <Button className="cursor-pointer">
-        <Image
-          src="/google_icon.png"
-          width={20}
-          height={20}
-          alt="Google Login"
+        <label htmlFor="email" className="text-sm font-medium">
+          Email
+        </label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="Email"
+          required
+          className="border-2 border-gray-300 rounded-md w-full"
         />
-        Login with Google
-      </Button>
-      <Button className="cursor-pointer">Login with Magic Link</Button>
-      <Button
-        variant="ghost"
-        className="cursor-pointer"
-        onClick={() => router.push("/signup")}
-      >
-        Create an Account
-      </Button>
-      <Button
-        variant="ghost"
-        className="cursor-pointer"
-        onClick={() => router.push("/forgot-password")}
-      >
-        Forgot Password?
-      </Button>
-    </div>
+
+        <label htmlFor="password" className="text-sm font-medium">
+          Password
+        </label>
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="Password"
+          required
+          className="border-2 border-gray-300 rounded-md"
+        />
+
+        {state?.error && (
+          <p className="text-sm text-red-500">{state.error}</p>
+        )}
+
+        {!pending ? (
+          <Button type="submit" className="mt-4">
+          Login
+        </Button>
+        ):(<Loader2 className="animate-spin"/>)}
+
+        <Button type="button" className="flex gap-2">
+          <Image
+            src="/google_icon.png"
+            width={20}
+            height={20}
+            alt="Google Login"
+          />
+          Login with Google
+        </Button>
+
+        <Button type="button">Login with Magic Link</Button>
+
+        <Button variant="ghost" type="button" 
+          onClick={() => router.push("/signup")}
+        >
+          Create an Account
+        </Button>
+
+        <Button variant="ghost" type="button" 
+          onClick={() => router.push("/forgot-password")}
+        >
+          Forgot Password?
+        </Button>
+      </div>
+    </form>
   );
 }

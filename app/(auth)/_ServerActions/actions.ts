@@ -1,10 +1,19 @@
 "use server"
 
 import {auth} from "@/lib/auth"
+import { redirect } from "next/navigation"
 
-export async function login(formData:FormData){
+type LoginState = {
+    error?:string,
+    success:boolean
+}
+
+export async function login(prevState:LoginState,formData:FormData):Promise<LoginState>{
     const email = formData.get("email") as string
     const password = formData.get("password") as string;
+
+
+    console.log("Email",email,"Password",password)
 
     const result = await auth.api.signInEmail({
         body:{
@@ -15,13 +24,21 @@ export async function login(formData:FormData){
         asResponse:true
     })
 
-    if(!result.ok){
-        const {error} = await result.json();
-        return {error:error?.message || "Login failed"}
+    if(!email || !password){
+        return {
+            success:false,
+            error:"Email and Password are required"
+        }
     }
 
+    if(!result.ok){
+        const {error} = await result.json();
+        //return {success:false,error:error?.message || "Login failed"}
+         redirect("/workspace/home")
 
-   
+    }
+
+    redirect("/workspace/home")
 }
 
 export async function signup(formData:FormData){
