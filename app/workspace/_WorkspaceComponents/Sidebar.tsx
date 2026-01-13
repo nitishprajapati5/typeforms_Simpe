@@ -9,6 +9,8 @@ import {
   PlusCircle,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useWorkSpaceBuilder } from "../hooks/useWorkSpaceBuilder"
+import AddWorkSpaceDialog from "./AddWorkSpace"
 
 type SidebarProps =
  {
@@ -21,6 +23,7 @@ type SidebarProps =
 export default function CustomSidebar({ open, onClose }: SidebarProps) {
 
   const router = useRouter();
+  const {isWorkSpaceDialogOpen,setWorkSpaceDialogOpen} = useWorkSpaceBuilder()
 
   return (
     <>
@@ -61,9 +64,14 @@ export default function CustomSidebar({ open, onClose }: SidebarProps) {
             <span className="ml-2 font-normal">WorkSpace</span>
             </div>
             <div>
-                <PlusCircle />
+                <PlusCircle onClick={() => {setWorkSpaceDialogOpen(!isWorkSpaceDialogOpen)}}/>
             </div>
         </div>
+
+        <AddWorkSpaceDialog 
+          isWorkSpaceDialogOpen={isWorkSpaceDialogOpen}
+          setWorkSpaceDialogOpen={setWorkSpaceDialogOpen}
+        />
       </aside>
     </>
   )

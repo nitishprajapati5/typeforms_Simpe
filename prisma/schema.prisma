@@ -38,10 +38,18 @@ model WorkSpaceSection {
   workspaceId String @default(uuid())
   workspacename String
   isDeleted Boolean @default(false)
+  forms FormData[]
+
+  @@map("workspaces")
 }
 
 model FormData {
   id    String  @id @default(auto()) @map("_id") @db.ObjectId
   formId String @default(uuid())
+
+  workspaceId String @db.ObjectId
+
+  workspace WorkSpaceSection @relation(fields: [workspaceId],references: [id],onDelete:Cascade)
+  @@map("forms")
 }
 
