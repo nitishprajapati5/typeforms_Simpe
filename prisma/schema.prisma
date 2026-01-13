@@ -4,7 +4,7 @@ generator client {
 
 
 datasource db {
-  provider = "mysql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
@@ -14,7 +14,7 @@ enum AuthProvider {
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
   username  String   @unique
 
@@ -31,5 +31,17 @@ model User {
   code String?
 
   createdAt DateTime @default(now())
+}
+
+model WorkSpaceSection {
+  id  String  @id @default(auto()) @map("_id") @db.ObjectId
+  workspaceId String @default(uuid())
+  workspacename String
+  isDeleted Boolean @default(false)
+}
+
+model FormData {
+  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  formId String @default(uuid())
 }
 
