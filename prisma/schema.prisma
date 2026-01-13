@@ -31,6 +31,7 @@ model User {
   code String?
 
   createdAt DateTime @default(now())
+  workSpace WorkSpaceSection[]
 }
 
 model WorkSpaceSection {
@@ -40,7 +41,12 @@ model WorkSpaceSection {
   isDeleted Boolean @default(false)
   forms FormData[]
 
+  userId String @db.ObjectId
+  user User @relation(fields: [userId],references: [id],onDelete:Cascade)
+
+
   @@map("workspaces")
+  @@index([userId])
 }
 
 model FormData {

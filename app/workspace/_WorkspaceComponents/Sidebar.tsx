@@ -1,29 +1,25 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Plus,
-  SearchCode,
-  Blocks,
-  PlusCircle,
-} from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useWorkSpaceBuilder } from "../hooks/useWorkSpaceBuilder"
-import AddWorkSpaceDialog from "./AddWorkSpace"
-
-type SidebarProps =
- {
-  open: boolean
-  onClose: () => void
-}
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus, SearchCode, Blocks, PlusCircle, } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useWorkSpaceBuilder } from "../hooks/useWorkSpaceBuilder";
+import AddWorkSpaceDialog from "./AddWorkSpace";
+import { workSpaces } from "../types/Tworkspace";
 
 
+type SidebarProps = {
+  open: boolean;
+  onClose: () => void;
+  customSideBarWorkSpaceProps:workSpaces
+};
 
-export default function CustomSidebar({ open, onClose }: SidebarProps) {
-
+export default function CustomSidebar({ open, onClose,customSideBarWorkSpaceProps }: SidebarProps) {
   const router = useRouter();
-  const {isWorkSpaceDialogOpen,setWorkSpaceDialogOpen} = useWorkSpaceBuilder()
+  const { isWorkSpaceDialogOpen, setWorkSpaceDialogOpen } =
+    useWorkSpaceBuilder();
+ 
 
   return (
     <>
@@ -43,36 +39,51 @@ export default function CustomSidebar({ open, onClose }: SidebarProps) {
           lg:static lg:translate-x-0
         `}
       >
-       
-
         {/* Create Form Button */}
         <div className="p-4 mt-auto">
-          <Button onClick={() => router.push("/form/build")} className="w-full flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground py-2">
+          <Button
+            onClick={() => router.push("/form/build")}
+            className="w-full flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground py-2"
+          >
             <Plus size={16} />
             Create a new Form
           </Button>
         </div>
 
         <div className="p-4 relative">
-            <SearchCode size={16} className="absolute left-6 top-1/2 transform -translate-y-1/2"/>
-            <Input placeholder="Search the Forms" className="pl-10 border-2 border-gray-300"/>
+          <SearchCode
+            size={16}
+            className="absolute left-6 top-1/2 transform -translate-y-1/2"
+          />
+          <Input
+            placeholder="Search the Forms"
+            className="pl-10 border-2 border-gray-300"
+          />
         </div>
 
         <div className="p-4 flex items-center flex-row justify-between">
-            <div className="flex">
-                <Blocks />
+          <div className="flex">
+            <Blocks />
             <span className="ml-2 font-normal">WorkSpace</span>
-            </div>
-            <div>
-                <PlusCircle onClick={() => {setWorkSpaceDialogOpen(!isWorkSpaceDialogOpen)}}/>
-            </div>
+          </div>
+          <div>
+            <PlusCircle
+              onClick={() => {
+                setWorkSpaceDialogOpen(!isWorkSpaceDialogOpen);
+              }}
+            />
+          </div>
         </div>
 
-        <AddWorkSpaceDialog 
+        
+
+
+
+        <AddWorkSpaceDialog
           isWorkSpaceDialogOpen={isWorkSpaceDialogOpen}
           setWorkSpaceDialogOpen={setWorkSpaceDialogOpen}
         />
       </aside>
     </>
-  )
+  );
 }

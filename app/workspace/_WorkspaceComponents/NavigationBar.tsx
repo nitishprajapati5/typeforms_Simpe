@@ -17,7 +17,7 @@ export default function NavigationBar({ onMenuClick }: NavigationBarProps) {
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 rounded-md hover:bg-muted"
+          className="lg:hidden p-2 rounded-md hover:bg-muted cursor-pointer"
           aria-label="Open sidebar"
         >
           <Menu size={20} />
