@@ -67,7 +67,9 @@ export default function Login() {
           Login with Google
         </Button>
 
-        <Button type="button">Login with Magic Link</Button>
+        <Button type="button"
+         onClick={() => router.push("/magic-link")}
+        >Login with Magic Link</Button>
 
         <Button variant="ghost" type="button" 
           onClick={() => router.push("/signup")}

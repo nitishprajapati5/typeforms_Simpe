@@ -29,7 +29,8 @@ export const ApiResponse = {
 
 export type ActionSuccess<T = null> = {
   success : true
-  data ? :T
+  data ? :T,
+  message:string
 }
 
 export type ActionError = {

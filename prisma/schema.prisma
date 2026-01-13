@@ -8,32 +8,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AuthProvider {
+  CREDENTIALS
+  GOOGLE
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   username  String   @unique
-  password  String
+
+  // For Password Login
+  password  String? 
+
+  // OAuth
+  provider AuthProvider @default(CREDENTIALS)
+  googleId String?   @unique
+
+  //Magic Link
+  magicToken String?
+  magicExpiresAt DateTime?
+  code String?
+
   createdAt DateTime @default(now())
-
-  accounts  Account[]
-  sessions  Session[]
 }
 
-model Account {
-  id                String @id @default(uuid())
-  provider          String
-  providerAccountId String
-  userId            String
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id        String   @id @default(uuid())
-  userId    String
-  expiresAt DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
