@@ -11,7 +11,11 @@ import { Loader2 } from "lucide-react";
 
 export default function Login() {
   const router = useRouter()
-  const [state, formAction] = useActionState(login, { error: undefined,success:false });
+  const [state, formAction] = useActionState(login, {
+    success:false,
+    message:""
+  })
+
   const {pending,} = useFormStatus()
 
   return (
@@ -43,8 +47,8 @@ export default function Login() {
           className="border-2 border-gray-300 rounded-md"
         />
 
-        {state?.error && (
-          <p className="text-sm text-red-500">{state.error}</p>
+        {state?.success === false && (
+          <p className="text-sm text-red-500">{state.message}</p>
         )}
 
         {!pending ? (
