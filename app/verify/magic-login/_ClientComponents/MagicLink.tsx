@@ -13,9 +13,9 @@ export default function MagicLinkPage({ token }: { token: string }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-md text-center">
-        <h1 className="text-xl font-bold text-gray-900">Finalize Sign In</h1>
+        <h1 className="text-xl font-bold text-gray-900">Sign In with Code and Magic Link</h1>
         <p className="mt-3 text-gray-600">
-          Click the button below to verify your email.
+          Click here to login
         </p>
 
         <form action={formAction} className="mt-6 space-y-3">
