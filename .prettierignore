@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+build
+dist
+*.lock
+*.lockb
+package-lock.json
+bun.lockb
+.env
+.env.*
+public
