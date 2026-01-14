@@ -6,8 +6,8 @@
     "dev": "bun --bun next dev",
     "build": "bun --bun next build",
     "start": "bun --bun next start",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
+    "lint": "next lint ./",
+    "lint:fix": "next lint ./ --fix",
     "lint:strict": "next lint --strict",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
