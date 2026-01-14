@@ -37,7 +37,7 @@ export default function WorkSpaceNameChangeDialog({
       setWorkSpaceName(name);
       setDialogOpen(false);
     }
-  }, [state.success]);
+  }, [name, setDialogOpen, setWorkSpaceName, state.success]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setDialogOpen}>

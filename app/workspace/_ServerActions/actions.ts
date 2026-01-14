@@ -5,7 +5,7 @@ import { withAuth } from "@/app/_ClientComponents/withAuth";
 import prisma from "@/app/_DatabaseConfiguration/dbConfig";
 import { revalidatePath } from "next/cache";
 
-export const getAllWorkSpaceData = withAuth(async (userData,FormData) => {
+export const getAllWorkSpaceData = withAuth(async () => {
 
     const data = await prisma.workSpaceSection.findMany()
 
@@ -75,6 +75,7 @@ export const editWorkSpaceName = withAuth(async (usePresenceData,formData) => {
         success:true,
         message:"Workspace Name Updated Success fully"
     }
+   // eslint-disable-next-line @typescript-eslint/no-unused-vars
    } catch (error) {
         return {
             success:false,
