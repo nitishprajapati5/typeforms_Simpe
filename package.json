@@ -10,7 +10,9 @@
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lighthouse": "lhci autorun",
+    "lighthouse:local": "lighthouse http://localhost:3000 --view"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -50,6 +52,7 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -63,6 +66,7 @@
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "husky": "^9.1.7",
+    "lighthouse": "^13.0.1",
     "lint-staged": "^16.2.7",
     "postcss": "^8.5.6",
     "prettier": "^3.7.4",
