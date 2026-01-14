@@ -19,8 +19,7 @@ interface FormNavbarProps {
 }
 
 export const FormNavbar = ({
-  formName,
-  onFormNameClick,
+
   onPublish,
   onDesignClick,
   onSettingClick,

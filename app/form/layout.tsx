@@ -1,4 +1,3 @@
-import { ChevronRight, FormInput } from "lucide-react";
 
 export default function FormLayout({
   children,
@@ -7,7 +6,6 @@ export default function FormLayout({
 }) {
   return (
     <div className="flex flex-col min-h-screen overflow-auto">
-     
       <main>{children}</main>
     </div>
   );

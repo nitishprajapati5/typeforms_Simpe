@@ -91,6 +91,7 @@ export async function getSession(): Promise<SessionUser | null> {
     }
 
     return decoded;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return null;
   }
