@@ -1,5 +1,3 @@
-export default function PreviewForm(){
-    return <div>
-        Hi Preview Available
-    </div>
+export default function PreviewForm() {
+  return <div>Hi Preview Available</div>;
 }

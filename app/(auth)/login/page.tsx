@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import Image from "next/image";
-import { login } from "../_ServerActions/actions";
-import { useRouter } from "next/navigation";
-import { useActionState } from "react";
-import { useFormStatus } from "react-dom";
-import { Loader2 } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import Image from 'next/image';
+import { login } from '../_ServerActions/actions';
+import { useRouter } from 'next/navigation';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
+import { Loader2 } from 'lucide-react';
 
 export default function Login() {
-  const router = useRouter()
+  const router = useRouter();
   const [state, formAction] = useActionState(login, {
-    success:false,
-    message:""
-  })
+    success: false,
+    message: '',
+  });
 
-  const {pending,} = useFormStatus()
+  const { pending } = useFormStatus();
 
   return (
     <form action={formAction} className="w-1/2 justify-center items-center">
@@ -53,9 +53,11 @@ export default function Login() {
 
         {!pending ? (
           <Button type="submit" className="mt-4">
-          Login
-        </Button>
-        ):(<Loader2 className="animate-spin"/>)}
+            Login
+          </Button>
+        ) : (
+          <Loader2 className="animate-spin" />
+        )}
 
         <Button type="button" className="flex gap-2">
           <Image
@@ -67,18 +69,22 @@ export default function Login() {
           Login with Google
         </Button>
 
-        <Button type="button"
-         onClick={() => router.push("/magic-link")}
-        >Login with Magic Link</Button>
+        <Button type="button" onClick={() => router.push('/magic-link')}>
+          Login with Magic Link
+        </Button>
 
-        <Button variant="ghost" type="button" 
-          onClick={() => router.push("/signup")}
+        <Button
+          variant="ghost"
+          type="button"
+          onClick={() => router.push('/signup')}
         >
           Create an Account
         </Button>
 
-        <Button variant="ghost" type="button" 
-          onClick={() => router.push("/forgot-password")}
+        <Button
+          variant="ghost"
+          type="button"
+          onClick={() => router.push('/forgot-password')}
         >
           Forgot Password?
         </Button>

@@ -1,15 +1,15 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@radix-ui/react-label";
-import { useActionState, useEffect } from "react";
-import { createWorkSpace } from "../_ServerActions/actions";
-import { Loader2 } from "lucide-react";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@radix-ui/react-label';
+import { useActionState, useEffect } from 'react';
+import { createWorkSpace } from '../_ServerActions/actions';
+import { Loader2 } from 'lucide-react';
 
 interface AddWorkSpaceDialogProps {
   isWorkSpaceDialogOpen: boolean;
@@ -22,14 +22,14 @@ export default function AddWorkSpaceDialog({
 }: AddWorkSpaceDialogProps) {
   const [state, formAction, pending] = useActionState(createWorkSpace, {
     success: false,
-    message: "",
+    message: '',
   });
 
   useEffect(() => {
     if (state.success === true) {
       setWorkSpaceDialogOpen(false);
     }
-  }, [state.success,setWorkSpaceDialogOpen]);
+  }, [state.success, setWorkSpaceDialogOpen]);
 
   return (
     <Dialog open={isWorkSpaceDialogOpen} onOpenChange={setWorkSpaceDialogOpen}>
@@ -51,7 +51,7 @@ export default function AddWorkSpaceDialog({
 
           <Button type="submit" disabled={pending} className="w-full gap-2">
             {pending && <Loader2 className="animate-spin" />}
-            {pending ? "Adding Workspace..." : "Add Workspace"}
+            {pending ? 'Adding Workspace...' : 'Add Workspace'}
           </Button>
         </form>
       </DialogContent>

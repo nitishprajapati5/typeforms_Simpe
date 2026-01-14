@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   ArrowDownAZIcon,
   Calendar,
@@ -6,34 +6,37 @@ import {
   Grid,
   List,
   Pen,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import Image from "next/image";
-import { useWorkSpaceBuilder } from "../../hooks/useWorkSpaceBuilder";
-import WorkSpaceNameChangeDialog from "../../_WorkspaceComponents/WorkSpaceNameChangeDialog";
+} from '@/components/ui/dropdown-menu';
+import Image from 'next/image';
+import { useWorkSpaceBuilder } from '../../hooks/useWorkSpaceBuilder';
+import WorkSpaceNameChangeDialog from '../../_WorkspaceComponents/WorkSpaceNameChangeDialog';
 
 interface HomeClientProps {
-    workspaceId:string;
-    initialWorkSpaceName:string
+  workspaceId: string;
+  initialWorkSpaceName: string;
 }
 
 export default function HomeClient({
-    workspaceId,
-    initialWorkSpaceName
-}:HomeClientProps) {
-  const { isDialogOpen, setDialogOpen,setWorkSpaceName } = useWorkSpaceBuilder();
+  workspaceId,
+  initialWorkSpaceName,
+}: HomeClientProps) {
+  const { isDialogOpen, setDialogOpen, setWorkSpaceName } =
+    useWorkSpaceBuilder();
 
   return (
     <div className="min-h-screen flex flex-col p-4">
       <div className="flex flex-row items-center gap-2 justify-between">
         <div className="flex flex-row items-center gap-2">
           <div>
-            <h1 className="text-2xl font-bold">{initialWorkSpaceName || "Work Space Name"}</h1>
+            <h1 className="text-2xl font-bold">
+              {initialWorkSpaceName || 'Work Space Name'}
+            </h1>
             <p className="text-gray-600">Create and manage your forms</p>
           </div>
           <div>

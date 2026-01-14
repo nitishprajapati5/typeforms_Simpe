@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus, SearchCode, Blocks, PlusCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useWorkSpaceBuilder } from "../hooks/useWorkSpaceBuilder";
-import AddWorkSpaceDialog from "./AddWorkSpace";
-import { workSpace, workSpaces } from "../types/Tworkspace";
-import Link from "next/link";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Plus, SearchCode, Blocks, PlusCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useWorkSpaceBuilder } from '../hooks/useWorkSpaceBuilder';
+import AddWorkSpaceDialog from './AddWorkSpace';
+import { workSpace, workSpaces } from '../types/Tworkspace';
+import Link from 'next/link';
 
 type SidebarProps = {
   open: boolean;
@@ -38,14 +38,14 @@ export default function CustomSidebar({
         className={`
           fixed z-50 inset-y-0 left-0 w-64 bg-background border-r
           transform transition-transform duration-300
-          ${open ? "translate-x-0" : "-translate-x-full"}
+          ${open ? 'translate-x-0' : '-translate-x-full'}
           lg:static lg:translate-x-0
         `}
       >
         {/* Create Form Button */}
         <div className="p-4 mt-auto">
           <Button
-            onClick={() => router.push("/form/build")}
+            onClick={() => router.push('/form/build')}
             className="w-full flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground py-2"
           >
             <Plus size={16} />
@@ -97,7 +97,9 @@ export default function CustomSidebar({
               "
               title={csp.workspacename}
             >
-              <Link href={`/workspace/home/${csp.id}`}>{csp.workspacename}</Link>
+              <Link href={`/workspace/home/${csp.id}`}>
+                {csp.workspacename}
+              </Link>
             </div>
           ))}
         </div>

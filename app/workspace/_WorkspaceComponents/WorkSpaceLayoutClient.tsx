@@ -1,15 +1,18 @@
-"use client";
+'use client';
 
-import { useWorkSpaceBuilderWithProvider } from "../context/WorkSpaceContext";
-import NavigationBar from "./NavigationBar";
-import { ReactNode } from "react";
+import { useWorkSpaceBuilderWithProvider } from '../context/WorkSpaceContext';
+import NavigationBar from './NavigationBar';
+import { ReactNode } from 'react';
 
 interface WorkspaceLayoutClientProps {
   children: ReactNode;
   sidebar: ReactNode;
 }
 
-export default function WorkspaceLayoutClient({ children, sidebar }: WorkspaceLayoutClientProps) {
+export default function WorkspaceLayoutClient({
+  children,
+  sidebar,
+}: WorkspaceLayoutClientProps) {
   const { setSidebarOpen } = useWorkSpaceBuilderWithProvider();
 
   return (

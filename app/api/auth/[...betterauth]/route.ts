@@ -1,3 +1,3 @@
-import {auth} from "@/lib/auth"
+import { auth } from '@/lib/auth';
 
-export default auth.handler
+export default auth.handler;

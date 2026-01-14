@@ -1,14 +1,13 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { useWorkSpaceBuilder } from "../hooks/useWorkSpaceBuilder";
-import { Button } from "@/components/ui/button";
-import AddWorkSpaceDialog from "../_WorkspaceComponents/AddWorkSpace";
+import Image from 'next/image';
+import { useWorkSpaceBuilder } from '../hooks/useWorkSpaceBuilder';
+import { Button } from '@/components/ui/button';
+import AddWorkSpaceDialog from '../_WorkspaceComponents/AddWorkSpace';
 
 export default function HomePage({}) {
   const { isWorkSpaceDialogOpen, setWorkSpaceDialogOpen } =
     useWorkSpaceBuilder();
-  
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -19,7 +18,7 @@ export default function HomePage({}) {
         </Button>
         <p className="text-md">OR</p>
         <p className="text-sm text-gray-500">
-          Select WorkSpace already Created{" "}
+          Select WorkSpace already Created{' '}
         </p>
       </div>
       <AddWorkSpaceDialog

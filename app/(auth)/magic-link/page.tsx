@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useActionState } from "react";
-import { magicLink } from "../_ServerActions/actions";
-import { useFormStatus } from "react-dom";
-import { toast } from "sonner";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useActionState } from 'react';
+import { magicLink } from '../_ServerActions/actions';
+import { useFormStatus } from 'react-dom';
+import { toast } from 'sonner';
 
 export default function MagicLink() {
   const router = useRouter();
   const [state, formAction] = useActionState(magicLink, {
     success: false,
-    message: "",
+    message: '',
   });
 
   const { pending } = useFormStatus();
 
-  if(state.success){
-    toast.success("Magic link send! Check your email.")
+  if (state.success) {
+    toast.success('Magic link send! Check your email.');
   }
 
   return (
@@ -51,14 +51,14 @@ export default function MagicLink() {
           <Loader2 className="animate-spin" />
         )}
 
-        <Button type="button" onClick={() => router.push("/login")}>
+        <Button type="button" onClick={() => router.push('/login')}>
           Login with Credentials
         </Button>
 
         <Button
           variant="ghost"
           type="button"
-          onClick={() => router.push("/signup")}
+          onClick={() => router.push('/signup')}
         >
           Create an Account
         </Button>
@@ -66,7 +66,7 @@ export default function MagicLink() {
         <Button
           variant="ghost"
           type="button"
-          onClick={() => router.push("/forgot-password")}
+          onClick={() => router.push('/forgot-password')}
         >
           Forgot Password?
         </Button>

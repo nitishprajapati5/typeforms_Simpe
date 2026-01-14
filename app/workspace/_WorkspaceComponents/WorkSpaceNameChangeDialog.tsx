@@ -1,15 +1,15 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useActionState, useEffect, useState } from "react";
-import { editWorkSpaceName } from "../_ServerActions/actions";
-import { Loader2 } from "lucide-react";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useActionState, useEffect, useState } from 'react';
+import { editWorkSpaceName } from '../_ServerActions/actions';
+import { Loader2 } from 'lucide-react';
 
 interface WorkSpaceNameChangeDialogProps {
   isOpen: boolean;
@@ -29,7 +29,7 @@ export default function WorkSpaceNameChangeDialog({
   const [name, setName] = useState(workSpaceName);
   const [state, formAction, pending] = useActionState(editWorkSpaceName, {
     success: false,
-    message: "",
+    message: '',
   });
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function WorkSpaceNameChangeDialog({
           <Button type="submit" disabled={pending}>
             {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save Changes
-          </Button>{" "}
+          </Button>{' '}
         </form>
       </DialogContent>
     </Dialog>

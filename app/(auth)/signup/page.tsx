@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useActionState } from "react";
-import { signup } from "../_ServerActions/actions";
-import { useFormStatus } from "react-dom";
-import { Loader2 } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useActionState } from 'react';
+import { signup } from '../_ServerActions/actions';
+import { useFormStatus } from 'react-dom';
+import { Loader2 } from 'lucide-react';
 
 export default function Signup() {
   const router = useRouter();
   const [state, formAction] = useActionState(signup, {
-    success:false,
-    message:""
+    success: false,
+    message: '',
   });
   const { pending } = useFormStatus();
 
@@ -64,7 +64,7 @@ export default function Signup() {
         <Button
           variant="ghost"
           className="cursor-pointer"
-          onClick={() => router.push("/login")}
+          onClick={() => router.push('/login')}
         >
           Already have an Account? Login
         </Button>

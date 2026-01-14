@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { FormIcon } from "lucide-react";
-import Image from "next/image";
-import { easeInOut, motion } from "framer-motion";
-import TypewriterLoop from "./_ClientComponents/TypewriterText";
-import AnimatedFormIcon from "./_ClientComponents/FormRotating";
-import  { useRouter } from "next/navigation";
+import { Button } from '@/components/ui/button';
+import { FormIcon } from 'lucide-react';
+import Image from 'next/image';
+import { easeInOut, motion } from 'framer-motion';
+import TypewriterLoop from './_ClientComponents/TypewriterText';
+import AnimatedFormIcon from './_ClientComponents/FormRotating';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const router = useRouter()
+  const router = useRouter();
   const containerVariants = {
     hidden: {},
     visible: {
@@ -41,11 +41,19 @@ export default function Home() {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2">
-          <Button size="lg" className="shadow-lg" onClick={() => router.push("/login")}>
+          <Button
+            size="lg"
+            className="shadow-lg"
+            onClick={() => router.push('/login')}
+          >
             Login
           </Button>
 
-          <Button size="lg" className="shadow-lg" onClick={() => router.push("/signup")}>
+          <Button
+            size="lg"
+            className="shadow-lg"
+            onClick={() => router.push('/signup')}
+          >
             Signup
           </Button>
 
@@ -68,14 +76,14 @@ export default function Home() {
         initial="hidden"
         animate="visible"
       >
-<motion.div
-  initial={{ opacity: 0, scale: 0.9 }}
-  animate={{ opacity: 1, scale: 1 }}
-  transition={{ duration: 0.6 }}
-  className="mb-10"
->
-  <AnimatedFormIcon />
-</motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+          className="mb-10"
+        >
+          <AnimatedFormIcon />
+        </motion.div>
         <motion.div
           variants={textVariants}
           className="
@@ -87,13 +95,13 @@ export default function Home() {
         >
           <TypewriterLoop
             texts={[
-              "Build Forms Easily",
-              "Create Survey Forms",
-              "Track Responses in Real-Time",
-              "Analyze Data Effortlessly",
-              "Customize Form Designs",
-              "Integrate with Other Tools",
-              "Collaborate with Team Members",
+              'Build Forms Easily',
+              'Create Survey Forms',
+              'Track Responses in Real-Time',
+              'Analyze Data Effortlessly',
+              'Customize Form Designs',
+              'Integrate with Other Tools',
+              'Collaborate with Team Members',
             ]}
             className="
               block

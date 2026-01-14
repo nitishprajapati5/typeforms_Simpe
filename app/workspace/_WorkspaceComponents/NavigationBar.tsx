@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Menu, ChevronDown, FormInput, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Menu, ChevronDown, FormInput, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type NavigationBarProps = {
   onMenuClick: () => void;
@@ -46,7 +46,11 @@ export default function NavigationBar({ onMenuClick }: NavigationBarProps) {
 
         {open && (
           <div className="absolute right-0 mt-8 w-48 rounded-md border bg-background shadow-md z-50 animate-in transition-all">
-            <X size={16} className=" cursor-pointer absolute top-2 right-2" onClick={() => setOpen(false)} />
+            <X
+              size={16}
+              className=" cursor-pointer absolute top-2 right-2"
+              onClick={() => setOpen(false)}
+            />
             <MenuItem label="Profile" />
             <MenuItem label="Billing" />
             <MenuItem label="Team" />
@@ -62,7 +66,7 @@ function MenuItem({ label, danger }: { label: string; danger?: boolean }) {
   return (
     <button
       className={`w-full text-left px-4 py-2 text-sm hover:bg-muted ${
-        danger ? "text-red-600" : ""
+        danger ? 'text-red-600' : ''
       }`}
     >
       {label}

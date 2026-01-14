@@ -1,28 +1,31 @@
-"use server";
+'use server';
 
-import { jsonWebTokenGeneration,generateHashedPassword, ActionResponse } from "@/app/_ClientComponents/UtiltiyFunction";
-import prisma from "@/app/_DatabaseConfiguration/dbConfig";
-import bcrypt from "bcryptjs";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import crypto from "crypto"
-import {Resend} from "resend"
-import path from "path";
-import fs from "fs"
-import cryptoRandomString from 'crypto-random-string'
+import {
+  jsonWebTokenGeneration,
+  generateHashedPassword,
+  ActionResponse,
+} from '@/app/_ClientComponents/UtiltiyFunction';
+import prisma from '@/app/_DatabaseConfiguration/dbConfig';
+import bcrypt from 'bcryptjs';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import crypto from 'crypto';
+import { Resend } from 'resend';
+import path from 'path';
+import fs from 'fs';
+import cryptoRandomString from 'crypto-random-string';
 
 export async function login(
   prevState: ActionResponse,
   formData: FormData
 ): Promise<ActionResponse> {
-
-  const email = String(formData.get("email") || "");
-  const password = String(formData.get("password") || "");
+  const email = String(formData.get('email') || '');
+  const password = String(formData.get('password') || '');
 
   if (!email || !password) {
     return {
       success: false,
-      message: "Email and password are required",
+      message: 'Email and password are required',
     };
   }
 
@@ -31,15 +34,15 @@ export async function login(
   if (!user) {
     return {
       success: false,
-      message: "Invalid email or password",
+      message: 'Invalid email or password',
     };
   }
 
-  if(user.provider === "GOOGLE"){
+  if (user.provider === 'GOOGLE') {
     return {
-      success:false,
-      message:"This account uses Google Sign-In.Please login with Google."
-    }
+      success: false,
+      message: 'This account uses Google Sign-In.Please login with Google.',
+    };
   }
 
   const isValid = bcrypt.compare(password, user.password!);
@@ -47,54 +50,51 @@ export async function login(
   if (!isValid) {
     return {
       success: false,
-      message: "Invalid email or password",
+      message: 'Invalid email or password',
     };
   }
 
   const token = jsonWebTokenGeneration(user.id, user.username);
 
-  (await cookies()).set("access_token", token, {
+  (await cookies()).set('access_token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  redirect("/workspace/home");
+  redirect('/workspace/home');
 }
-
 
 export async function signup(
   prevState: ActionResponse,
   formData: FormData
 ): Promise<ActionResponse> {
-
-  const email = String(formData.get("email") || "");
-  const password = String(formData.get("password") || "");
+  const email = String(formData.get('email') || '');
+  const password = String(formData.get('password') || '');
 
   if (!email || !password) {
     return {
       success: false,
-      message: "Please enter email and password",
+      message: 'Please enter email and password',
     };
   }
 
   const existingUser = await prisma.user.findUnique({ where: { email } });
 
-  
   if (existingUser) {
-
-    if(existingUser.provider === "GOOGLE"){
+    if (existingUser.provider === 'GOOGLE') {
       return {
-        success:false,
-        message:"This email is already registered with Google. Please use Google Sign-In"
-      }
+        success: false,
+        message:
+          'This email is already registered with Google. Please use Google Sign-In',
+      };
     }
 
     return {
       success: false,
-      message: "User already exists",
+      message: 'User already exists',
     };
   }
 
@@ -105,80 +105,82 @@ export async function signup(
       email,
       username: email,
       password: hashedPassword,
-      provider:"CREDENTIALS"
+      provider: 'CREDENTIALS',
     },
   });
 
   const token = jsonWebTokenGeneration(user.id, user.username);
 
-  (await cookies()).set("access_token", token, {
+  (await cookies()).set('access_token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
     maxAge: 60 * 60 * 24,
   });
 
-  redirect("/workspace/home");
+  redirect('/workspace/home');
 }
 
 export async function magicLink(
-  prevState:ActionResponse,
-  formData:FormData
-):Promise<ActionResponse>{
-  const email = String(formData.get("email"))
+  prevState: ActionResponse,
+  formData: FormData
+): Promise<ActionResponse> {
+  const email = String(formData.get('email'));
 
-  if(!email){
+  if (!email) {
     return {
-      success:false,
-      message:"Please provider email."
-    }
+      success: false,
+      message: 'Please provider email.',
+    };
   }
 
   const existingUser = await prisma.user.findUnique({
-    where:{email}
+    where: { email },
   });
 
-  if(!existingUser){
+  if (!existingUser) {
     return {
-      success:false,
-      message:"No Account Found."
-    }
+      success: false,
+      message: 'No Account Found.',
+    };
   }
 
-  const token = crypto.randomBytes(32).toString("hex")
-  const code = cryptoRandomString({length:10,type:'base64'})
+  const token = crypto.randomBytes(32).toString('hex');
+  const code = cryptoRandomString({ length: 10, type: 'base64' });
 
-  const user  = await prisma.user.update({
-    where:{email},
-    data:{
-      magicToken:token,
-      magicExpiresAt:new Date(Date.now() + 1000 * 60 * 15),
-      code:code
-    }
+  const user = await prisma.user.update({
+    where: { email },
+    data: {
+      magicToken: token,
+      magicExpiresAt: new Date(Date.now() + 1000 * 60 * 15),
+      code: code,
+    },
   });
 
-  const resendApiKey = process.env.RESEND_API_KEY!
-  const resend = new Resend(resendApiKey)
+  const resendApiKey = process.env.RESEND_API_KEY!;
+  const resend = new Resend(resendApiKey);
 
-  const templatePath = path.join(process.cwd(),"emails","magic-link.html")
+  const templatePath = path.join(process.cwd(), 'emails', 'magic-link.html');
 
-  let html = fs.readFileSync(templatePath,"utf-8")
+  let html = fs.readFileSync(templatePath, 'utf-8');
 
-  html = html.replaceAll("{{TOKEN}}",token).replaceAll("{{APP_URL}}",process.env.APP_URL!).replaceAll("{{CODE}}",code)
+  html = html
+    .replaceAll('{{TOKEN}}', token)
+    .replaceAll('{{APP_URL}}', process.env.APP_URL!)
+    .replaceAll('{{CODE}}', code);
 
   resend.emails.send({
-    from:"onboarding@resend.dev",
-    to:user.email,
-    subject:"Your secure login link",
-    html:html
-  })
+    from: 'onboarding@resend.dev',
+    to: user.email,
+    subject: 'Your secure login link',
+    html: html,
+  });
 
-  console.log("Secure login")
+  console.log('Secure login');
 
   return {
-    success:true,
-    message:"We have send an e-mail to your inbox."
-  }
+    success: true,
+    message: 'We have send an e-mail to your inbox.',
+  };
 }
-
