@@ -10,6 +10,7 @@
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "postinstall": "prisma generate",
     "prepare": "husky",
     "lighthouse": "lhci autorun",
     "lighthouse:local": "lighthouse http://localhost:3000 --view"
