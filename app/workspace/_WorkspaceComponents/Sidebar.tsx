@@ -2,24 +2,27 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, SearchCode, Blocks, PlusCircle, } from "lucide-react";
+import { Plus, SearchCode, Blocks, PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useWorkSpaceBuilder } from "../hooks/useWorkSpaceBuilder";
 import AddWorkSpaceDialog from "./AddWorkSpace";
-import { workSpaces } from "../types/Tworkspace";
-
+import { workSpace, workSpaces } from "../types/Tworkspace";
+import Link from "next/link";
 
 type SidebarProps = {
   open: boolean;
   onClose: () => void;
-  customSideBarWorkSpaceProps:workSpaces
+  customSideBarWorkSpaceProps: workSpaces;
 };
 
-export default function CustomSidebar({ open, onClose,customSideBarWorkSpaceProps }: SidebarProps) {
+export default function CustomSidebar({
+  open,
+  onClose,
+  customSideBarWorkSpaceProps,
+}: SidebarProps) {
   const router = useRouter();
   const { isWorkSpaceDialogOpen, setWorkSpaceDialogOpen } =
     useWorkSpaceBuilder();
- 
 
   return (
     <>
@@ -75,9 +78,29 @@ export default function CustomSidebar({ open, onClose,customSideBarWorkSpaceProp
           </div>
         </div>
 
-        
-
-
+        <div className="m-4 space-y-1">
+          {customSideBarWorkSpaceProps.map((csp: workSpace) => (
+            <div
+              key={csp.id}
+              className="
+                px-3 py-2
+                w-full
+                rounded-lg
+                font-medium text-sm
+                text-gray-700
+                truncate
+                cursor-pointer
+                transition-all
+                hover:bg-gray-100
+                hover:text-gray-900
+                active:bg-gray-200
+              "
+              title={csp.workspacename}
+            >
+              <Link href={`/workspace/home/${csp.id}`}>{csp.workspacename}</Link>
+            </div>
+          ))}
+        </div>
 
         <AddWorkSpaceDialog
           isWorkSpaceDialogOpen={isWorkSpaceDialogOpen}

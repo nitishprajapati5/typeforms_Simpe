@@ -14,10 +14,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
-import { useWorkSpaceBuilder } from "../hooks/useWorkSpaceBuilder";
-import WorkSpaceNameChangeDialog from "../_WorkspaceComponents/Dialog";
+import { useWorkSpaceBuilder } from "../../hooks/useWorkSpaceBuilder";
+import WorkSpaceNameChangeDialog from "../../_WorkspaceComponents/WorkSpaceNameChangeDialog";
 
-export default function Home() {
+interface HomeClientProps {
+    workspaceId:string;
+    initialWorkSpaceName:string
+}
+
+export default function HomeClient({
+    workspaceId,
+    initialWorkSpaceName
+}:HomeClientProps) {
   const { isDialogOpen, setDialogOpen,workSpaceName,setWorkSpaceName } = useWorkSpaceBuilder();
 
   return (
@@ -25,8 +33,8 @@ export default function Home() {
       <div className="flex flex-row items-center gap-2 justify-between">
         <div className="flex flex-row items-center gap-2">
           <div>
-            <h1 className="text-2xl font-bold">{workSpaceName || "Work Space Name"}</h1>
-            <p className="text-gray-600">Create and manage your survey forms</p>
+            <h1 className="text-2xl font-bold">{initialWorkSpaceName || "Work Space Name"}</h1>
+            <p className="text-gray-600">Create and manage your forms</p>
           </div>
           <div>
             <Ellipsis onClick={() => setDialogOpen(!isDialogOpen)} />
@@ -69,8 +77,8 @@ export default function Home() {
         isOpen={isDialogOpen}
         setDialogOpen={setDialogOpen}
         setWorkSpaceName={setWorkSpaceName}
-        workSpaceName={workSpaceName}
-
+        workSpaceName={initialWorkSpaceName}
+        workspaceId={workspaceId}
       />
     </div>
   );

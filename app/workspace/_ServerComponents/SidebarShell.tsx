@@ -7,6 +7,8 @@ export default async function SidebarShell(){
         orderBy:{workspacename:"asc"}
     })
 
+    console.log(workspaces)
+
     return <SidebarClient sideBarClientWorkSpaceProps={workspaces}/>
 
 

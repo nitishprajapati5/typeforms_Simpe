@@ -29,7 +29,7 @@ export default function AddWorkSpaceDialog({
     if (state.success === true) {
       setWorkSpaceDialogOpen(false);
     }
-  }, [state.success]);
+  }, [state.success,setWorkSpaceDialogOpen]);
 
   return (
     <Dialog open={isWorkSpaceDialogOpen} onOpenChange={setWorkSpaceDialogOpen}>
