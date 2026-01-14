@@ -1,4 +1,7 @@
-.next
 node_modules
+.next
+out
+build
 dist
-bun.lockb
+*.config.js
+*.config.mjs

@@ -4,5 +4,6 @@
   "singleQuote": true,
   "tabWidth": 2,
   "printWidth": 80,
-  "plugins": ["prettier-plugin-tailwindcss"]
+  "arrowParens": "always",
+  "endOfLine": "lf"
 }
