@@ -1,29 +1,32 @@
 // hooks/.ts
-import { useState } from "react";
+import { startTransition, useEffect, useState } from 'react';
 import {
   Question,
   FormConfigurationType,
   FormDesignConfiguration,
   Theme,
   DesignType,
-} from "../types";
+} from '../types';
 import {
   INITIAL_FORM_HEADER_CONFIG,
   INITIAL_DESIGN_CONFIG,
   INITIAL_FORM_SETTINGS,
-} from "../constants";
-import { questionConfigMap } from "../_Utils/utils";
-import { themes } from "../_Utils/utils";
+} from '../constants';
+import { questionConfigMap } from '../_Utils/utils';
+import { themes } from '../_Utils/utils';
+import { useUUIDClient } from '../_Context/UUIDClientProvider';
+import { initialValuePushToDatabase } from '../_ServerActions/actions';
+import { toast } from 'sonner';
 
 export const useFormBuilder = () => {
-  const [formName, setFormName] = useState("My new form");
+  const [formName, setFormName] = useState('My new form');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [formDesignConfiguration, setFormDesignConfiguration] =
     useState<FormDesignConfiguration>(INITIAL_DESIGN_CONFIG);
   const [formHeaderConfiguration, setFormHeaderConfiguration] =
     useState<FormConfigurationType>(INITIAL_FORM_HEADER_CONFIG);
-  const [newQuestionTitle, setNewQuestionTitle] = useState("");
-  const [selectedTypeOfQuestion, setSelectedTypeOfQuestion] = useState("");
+  const [newQuestionTitle, setNewQuestionTitle] = useState('');
+  const [selectedTypeOfQuestion, setSelectedTypeOfQuestion] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(themes[0]);
   const [selectedShade, setSelectedShade] = useState<string | null>(
     themes[0].shades[0]
@@ -33,10 +36,34 @@ export const useFormBuilder = () => {
     INITIAL_FORM_SETTINGS
   );
 
-  const updateFormChanges = <K extends keyof FormConfigurationType["title"]>(
+  const { currentUUID, setLoading } = useUUIDClient();
+
+  useEffect(() => {
+    if (!currentUUID) return;
+
+    startTransition(async () => {
+      setLoading(true);
+
+      const result = await initialValuePushToDatabase(
+        currentUUID,
+        formHeaderConfiguration,
+        questions,
+        formSettingConfiguration,
+        formDesignConfiguration
+      );
+
+      setLoading(false);
+
+      if (!result.success) {
+        toast.error(result.message);
+      }
+    });
+  }, [currentUUID, formDesignConfiguration, formHeaderConfiguration, formSettingConfiguration, questions, setLoading]);
+
+  const updateFormChanges = <K extends keyof FormConfigurationType['title']>(
     formId: string,
     key: K,
-    value: FormConfigurationType["title"][K]
+    value: FormConfigurationType['title'][K]
   ) => {
     setFormHeaderConfiguration((prev) =>
       prev.formId === formId
@@ -52,11 +79,11 @@ export const useFormBuilder = () => {
   };
 
   const updateDescriptionFormChanges = <
-    K extends keyof FormConfigurationType["description"]
+    K extends keyof FormConfigurationType['description'],
   >(
     formId: string,
     key: K,
-    value: FormConfigurationType["description"][K]
+    value: FormConfigurationType['description'][K]
   ) => {
     setFormHeaderConfiguration((prev) =>
       prev.formId === formId
@@ -73,7 +100,7 @@ export const useFormBuilder = () => {
 
   const addQuestion = () => {
     if (!selectedTypeOfQuestion || !newQuestionTitle.trim()) {
-      alert("Please enter a question title and select a type");
+      alert('Please enter a question title and select a type');
       return;
     }
 
@@ -86,8 +113,8 @@ export const useFormBuilder = () => {
     };
 
     setQuestions((prev) => [...prev, newQuestion]);
-    setNewQuestionTitle("");
-    setSelectedTypeOfQuestion("");
+    setNewQuestionTitle('');
+    setSelectedTypeOfQuestion('');
   };
 
   const updateQuestionTitle = (id: string, title: string) => {
@@ -129,7 +156,7 @@ export const useFormBuilder = () => {
   const updateDesignConfiguration = (
     fontValue: string | undefined,
     sizeValue: number | undefined,
-    key: "fontSelected" | "size",
+    key: 'fontSelected' | 'size',
     designType: DesignType
   ) => {
     setFormDesignConfiguration((prev) => ({
@@ -142,29 +169,35 @@ export const useFormBuilder = () => {
     }));
   };
 
-  const updateFormSettingChanges = 
-    (key: "shuffleQuestionOrder" | "showProgressBar" | "responseConfirmationMessage" | "showLinkToSubmitAnotherResponse" | "requiredSignIn" | "limitResponseToOne", 
-    value: boolean | string) => {
+  const updateFormSettingChanges = (
+    key:
+      | 'shuffleQuestionOrder'
+      | 'showProgressBar'
+      | 'responseConfirmationMessage'
+      | 'showLinkToSubmitAnotherResponse'
+      | 'requiredSignIn'
+      | 'limitResponseToOne',
+    value: boolean | string
+  ) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setFormSettingConfiguration((prev: any) => ({
       ...prev,
-      [key]: value, 
+      [key]: value,
     }));
 
-    console.log(formSettingConfiguration)
+    console.log(formSettingConfiguration);
   };
 
   const handlePublishEvent = () => {
-    console.log(formHeaderConfiguration)
+    console.log(formHeaderConfiguration);
     console.log(questions);
-    console.log(formSettingConfiguration)
-    console.log(formDesignConfiguration)
+    console.log(formSettingConfiguration);
+    console.log(formDesignConfiguration);
   };
 
   const handleDesignChanges = () => {
     console.log(selectedShade, selectedTheme);
-    console.log(formDesignConfiguration)
-
+    console.log(formDesignConfiguration);
   };
 
   return {

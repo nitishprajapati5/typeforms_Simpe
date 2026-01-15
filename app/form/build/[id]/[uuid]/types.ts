@@ -50,9 +50,9 @@ export interface DesignConfig {
 }
 
 export interface FormDesignConfiguration {
-  headerDesign: DesignConfig;
-  questionDesign: DesignConfig;
-  textDesign: DesignConfig;
+  headerDesign: {fontSelected:string,size:number};
+  questionDesign: {fontSelected:string,size:number};
+  textDesign: {fontSelected:string,size:number};
   headerImage: string;
   colorConfiguration: {
     color: string;
@@ -66,7 +66,8 @@ export interface FormSettingsConfiguration {
   responseConfirmationMessage:string | "Your Message have been recorded",
   showLinkToSubmitAnotherResponse:boolean,
   requiredSignIn:boolean,
-  limitResponseToOne:boolean
+  limitResponseToOne:boolean,
+  isPublished:boolean
 }
 
 export type DesignKey = "fontSelected" | "size";

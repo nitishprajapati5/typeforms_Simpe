@@ -96,7 +96,7 @@ model FormHeaderConfiguration {
 
 model FormQuestions{
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  uuid String
+  uuid String 
 
   required Boolean
   title String
@@ -107,6 +107,7 @@ model FormQuestions{
   form FormData @relation(fields: [formId],references: [id],onDelete:Cascade)
 
   @@index([uuid])
+  @@unique([uuid,formId])
 }
 
 model FormSettingConfiguration{
@@ -117,7 +118,7 @@ model FormSettingConfiguration{
 
   limitResponseToOne Boolean
   requiredSignIn Boolean
-  responseConfirmationMessage Boolean
+  responseConfirmationMessage String
   showLinkToSubmitAnotherResponse Boolean
   showProgressBar Boolean
   shuffleQuestionOrder Boolean

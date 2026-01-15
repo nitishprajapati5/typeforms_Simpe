@@ -50,5 +50,6 @@ export const INITIAL_FORM_SETTINGS:FormSettingsConfiguration = {
   responseConfirmationMessage:"Your Response have been recorded",
   showLinkToSubmitAnotherResponse:false,
   requiredSignIn:false,
-  limitResponseToOne:false
+  limitResponseToOne:false,
+  isPublished:false
 } 

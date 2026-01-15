@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,7 @@ import { DesignSheet } from './DesignSheet';
 import { DesignSettingSheet } from "./DesignSettingSheet";
 import { useFormBuilder } from "../hooks/useBuilder";
 import { FormNavbar } from "./FormNavbar";
+import { useUUIDClient } from "../_Context/UUIDClientProvider";
 
 interface UUIDClientProps{
     uuid:string
@@ -34,6 +35,14 @@ export default function UUIDClient({uuid}:UUIDClientProps) {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const {setCurrentUUID} = useUUIDClient()
+
+  useEffect(() => {
+    if (uuid) {
+      setCurrentUUID(uuid);
+    }
+  }, [uuid, setCurrentUUID]);
+  
 
   const {
     formName,
