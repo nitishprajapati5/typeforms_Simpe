@@ -6,6 +6,7 @@ import {
   Grid,
   List,
   Pen,
+  PlusCircleIcon,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -16,6 +17,8 @@ import {
 import Image from 'next/image';
 import { useWorkSpaceBuilder } from '../../hooks/useWorkSpaceBuilder';
 import WorkSpaceNameChangeDialog from '../../_WorkspaceComponents/WorkSpaceNameChangeDialog';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 interface HomeClientProps {
   workspaceId: string;
@@ -26,6 +29,7 @@ export default function HomeClient({
   workspaceId,
   initialWorkSpaceName,
 }: HomeClientProps) {
+  const router = useRouter();
   const { isDialogOpen, setDialogOpen, setWorkSpaceName } =
     useWorkSpaceBuilder();
 
@@ -70,6 +74,12 @@ export default function HomeClient({
             <span className="text-sm">Grid</span>
           </div>
         </div>
+      </div>
+
+      <div className="mt-2 flex justify-end">
+        <Button onClick={() => router.push(`/form/build/${workspaceId}`)}>
+          <PlusCircleIcon /> Create a new form
+        </Button>
       </div>
 
       <div className="flex flex-1 items-center justify-center">
