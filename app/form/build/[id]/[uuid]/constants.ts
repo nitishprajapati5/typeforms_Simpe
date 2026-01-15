@@ -1,4 +1,3 @@
-// constants.ts
 import { FormConfigurationType,FormDesignConfiguration, FormSettingsConfiguration } from "./types";
 export const FONT_AND_SIZE_SETTINGS = {
   Fonts: ["Roboto", "Sans", "Monteserrat"],
@@ -16,7 +15,7 @@ export const INITIAL_FORM_HEADER_CONFIG: FormConfigurationType = {
     TitleAlign: "left",
   },
   description: {
-    formDescription: "",
+    formDescription: "Form Description",
     placeholder: "Please enter form description",
     isDescriptionBold: false,
     isDescriptionItalic: false,

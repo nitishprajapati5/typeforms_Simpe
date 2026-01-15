@@ -32,6 +32,7 @@ model User {
 
   createdAt DateTime @default(now())
   workSpace WorkSpaceSection[]
+  formData FormData[]
 }
 
 model WorkSpaceSection {
@@ -51,11 +52,88 @@ model WorkSpaceSection {
 
 model FormData {
   id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  formId String @default(uuid())
+  formId String @default(uuid()) @unique
 
   workspaceId String @db.ObjectId
 
   workspace WorkSpaceSection @relation(fields: [workspaceId],references: [id],onDelete:Cascade)
+
+  userId String @db.ObjectId
+  user User @relation(fields: [userId],references: [id],onDelete:Cascade)
+
+  questions FormQuestions[]
+  formSettings FormSettingConfiguration?
+  formDesign FormDesignConfigurationSetting?
+  headerConfig FormHeaderConfiguration?
+
+
   @@map("forms")
 }
 
+model FormHeaderConfiguration {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+
+  formId   String @unique @db.ObjectId
+  form     FormData @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  formTitle        String
+  titlePlaceholder String
+  isTitleBold      Boolean @default(false)
+  isTitleItalic   Boolean @default(false)
+  isTitleUnderline Boolean @default(false)
+  titleAlign       String
+
+  formDescription        String
+  descriptionPlaceholder String
+  isDescriptionBold      Boolean @default(false)
+  isDescriptionItalic   Boolean @default(false)
+  isDescriptionUnderline Boolean @default(false)
+  descriptionAlign       String
+
+  @@map("form_header_config")
+}
+
+
+model FormQuestions{
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  uuid String
+
+  required Boolean
+  title String
+  type String
+  options Json
+
+  formId String @db.ObjectId
+  form FormData @relation(fields: [formId],references: [id],onDelete:Cascade)
+
+  @@index([uuid])
+}
+
+model FormSettingConfiguration{
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  formId String @db.ObjectId @unique
+  form FormData @relation(fields: [formId],references: [id],onDelete:Cascade)
+
+  limitResponseToOne Boolean
+  requiredSignIn Boolean
+  responseConfirmationMessage Boolean
+  showLinkToSubmitAnotherResponse Boolean
+  showProgressBar Boolean
+  shuffleQuestionOrder Boolean
+  isPublished Boolean
+
+}
+
+model FormDesignConfigurationSetting{
+   id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  formId String @db.ObjectId @unique
+  form FormData @relation(fields: [formId],references: [id],onDelete:Cascade)
+
+  colorConfiguration Json
+  headerDesign Json
+  headerImage String?
+  questionDesign Json
+  textDesign Json
+}
