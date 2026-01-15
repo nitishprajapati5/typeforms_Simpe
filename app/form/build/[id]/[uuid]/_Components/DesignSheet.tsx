@@ -39,6 +39,7 @@ interface DesignSheetProps {
   onThemeSelect: (theme: Theme) => void;
   onShadeSelect: (shade: string) => void;
   onSave: () => void;
+  uuid:string
 }
 
 export const DesignSheet = ({
@@ -51,6 +52,7 @@ export const DesignSheet = ({
   onThemeSelect,
   onShadeSelect,
   onSave,
+  uuid
 }: DesignSheetProps) => {
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>

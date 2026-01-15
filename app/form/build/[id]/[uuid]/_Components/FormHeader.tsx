@@ -20,6 +20,8 @@ interface FormHeaderProps {
 }
 
 export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormHeaderProps) => {
+
+
   return (
     <div className="w-full max-w-4xl bg-white rounded-lg shadow-sm p-6 border">
       <div className="w-full flex items-center flex-col justify-start gap-3">
@@ -30,7 +32,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
           onChange={(e) => onUpdateTitle(config.formId, "formTitle", e.target.value)}
           style={{ textAlign: config.title.TitleAlign }}
           className={cn(
-            "text-2xl w-full border-gray-300 focus:border-gray-400",
+            "text-md w-full border-gray-300 focus:border-gray-400",
             config.title.isTitleBold && "font-bold",
             config.title.isTitleItalic && "italic",
             config.title.isTitleUnderline && "underline"
@@ -103,7 +105,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
           onChange={(e) => onUpdateDescription(config.formId, "formDescription", e.target.value)}
           style={{ textAlign: config.description.DescriptionAlign }}
           className={cn(
-            "text-base w-full border-gray-300 focus:border-gray-400 min-h-20",
+            "text-md w-full border-gray-300 focus:border-gray-400 min-h-20",
             config.description.isDescriptionBold && "font-bold",
             config.description.isDescriptionItalic && "italic",
             config.description.isDescriptionUnderline && "underline"

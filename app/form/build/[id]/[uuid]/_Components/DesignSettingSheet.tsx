@@ -17,6 +17,7 @@ import { Settings } from "lucide-react";
 import { FormSettingsConfiguration } from "../types";
 
 interface DesignSettingSheetProps {
+  uuid:string;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdateFormSettings:(type: "shuffleQuestionOrder" | "showProgressBar" | "responseConfirmationMessage" | "showLinkToSubmitAnotherResponse" | "requiredSignIn" | "limitResponseToOne",key:boolean | string) => void,
@@ -27,7 +28,8 @@ export const DesignSettingSheet = ({
   isOpen,
   onOpenChange,
   onUpdateFormSettings,
-  intialFormState
+  intialFormState,
+  uuid
 }: DesignSettingSheetProps) => {
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -110,12 +112,12 @@ export const DesignSettingSheet = ({
             </div>
           </div>
         </div>
-        <SheetFooter>
+        {/* <SheetFooter>
           <Button type="submit">Save changes</Button>
           <SheetClose asChild>
             <Button variant="outline">Close</Button>
           </SheetClose>
-        </SheetFooter>
+        </SheetFooter> */}
       </SheetContent>
     </Sheet>
   );

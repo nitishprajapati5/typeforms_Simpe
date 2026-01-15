@@ -163,6 +163,8 @@ export const useFormBuilder = () => {
 
   const handleDesignChanges = () => {
     console.log(selectedShade, selectedTheme);
+    console.log(formDesignConfiguration)
+
   };
 
   return {
