@@ -39,7 +39,9 @@ interface DesignSheetProps {
   onThemeSelect: (theme: Theme) => void;
   onShadeSelect: (shade: string) => void;
   onSave: () => void;
-  uuid:string
+  uuid:string,
+  handleThemeSelection:(theme:Theme) => void;
+  handleShadeSelection:(shade:string) => void
 }
 
 export const DesignSheet = ({
@@ -52,6 +54,9 @@ export const DesignSheet = ({
   onThemeSelect,
   onShadeSelect,
   onSave,
+  handleThemeSelection,
+  handleShadeSelection,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   uuid
 }: DesignSheetProps) => {
   return (
@@ -216,6 +221,7 @@ export const DesignSheet = ({
                     onClick={() => {
                       onThemeSelect(color);
                       onShadeSelect(color.shades[0]);
+                      handleThemeSelection(color)
                     }}
                     style={{ backgroundColor: color.base }}
                   />
@@ -232,7 +238,10 @@ export const DesignSheet = ({
                   {selectedTheme.shades.map((shade) => (
                     <div className="relative" key={shade}>
                       <Button
-                        onClick={() => onShadeSelect(shade)}
+                        onClick={() => {
+                          onShadeSelect(shade)
+                          handleShadeSelection(shade)
+                        }}
                         className="h-4 p-4"
                         style={{ backgroundColor: shade }}
                       />

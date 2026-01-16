@@ -72,7 +72,9 @@ export default function UUIDClient({uuid}:UUIDClientProps) {
     isSettingSheetOpen,
     setSettingSheetOpen,
     updateFormSettingChanges,
-    formSettingConfiguration
+    formSettingConfiguration,
+    handleShadeSelection,
+    handleThemeSelection
   } = useFormBuilder();
 
   return (
@@ -148,6 +150,8 @@ export default function UUIDClient({uuid}:UUIDClientProps) {
         onThemeSelect={setSelectedTheme}
         onShadeSelect={setSelectedShade}
         onSave={handleDesignChanges}
+        handleShadeSelection={handleShadeSelection}
+        handleThemeSelection={handleThemeSelection}
       />
 
       <DesignSettingSheet 

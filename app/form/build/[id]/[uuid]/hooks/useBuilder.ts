@@ -7,6 +7,8 @@ import {
   Theme,
   DesignType,
   FormTitleConfig,
+  FormDescriptionConfig,
+  FormSettingsConfiguration,
 } from '../types';
 import {
   INITIAL_FORM_HEADER_CONFIG,
@@ -18,11 +20,19 @@ import { themes } from '../_Utils/utils';
 import { useUUIDClient } from '../_Context/UUIDClientProvider';
 import {
   initialValuePushToDatabase,
-  updateHeaderConfiguration,
+  updateFormDesignConfiguration,
+  updateFormSettingConfiguration,
+  updateHeaderDescriptionConfiguration,
+  updateHeaderTitleConfiguration,
 } from '../_ServerActions/actions';
 import { toast } from 'sonner';
 import { UseDebouncedHook } from './useDebounce';
-import { mapTitleToPayload } from '../Mappers/formHeader';
+import {
+  mapDescriptionToPayload,
+  mapDesignConfigurationtoPayload,
+  mapSettingConfigurationToPayload,
+  mapTitleToPayload,
+} from '../Mappers/formHeader';
 
 export const useFormBuilder = () => {
   const [formName, setFormName] = useState('My new form');
@@ -46,19 +56,59 @@ export const useFormBuilder = () => {
   const { currentUUID, setLoading } = useUUIDClient();
 
   useEffect(() => {
-    uuidRef.current = currentUUID
-  },[currentUUID])
+    uuidRef.current = currentUUID;
+  }, [currentUUID]);
 
-  const debouncedUpdateRef =
-  UseDebouncedHook<FormTitleConfig>(
+  const debounceChangesForFormTitleUpdated = UseDebouncedHook<FormTitleConfig>(
     async (data) => {
-      setLoading(true)
-      await updateHeaderConfiguration(uuidRef.current!, data);
+      setLoading(true);
+      const result = await updateHeaderTitleConfiguration(
+        uuidRef.current!,
+        data
+      );
       setLoading(false);
+      if (result.success === false) {
+        toast.error('Something went wrong');
+      }
     },
     1000
   );
 
+  const debounceChangesForFormDescriptionUpdated =
+    UseDebouncedHook<FormDescriptionConfig>(async (data) => {
+      setLoading(true);
+      const result = await updateHeaderDescriptionConfiguration(
+        uuidRef.current!,
+        data
+      );
+      setLoading(false);
+      if (result.success === false) {
+        toast.error('Something went wrong');
+      }
+    });
+
+  const debounceChangesForFormDesignConfigurationUpdated =
+    UseDebouncedHook<FormDesignConfiguration>(async (data) => {
+      setLoading(true);
+      const result = await updateFormDesignConfiguration(
+        uuidRef.current!,
+        data
+      );
+      setLoading(false);
+      if (result.success === false) {
+        toast.error('Something went wrong');
+      }
+    });
+
+    const debounceChangesForFormSettingConfigurationUpdated = 
+    UseDebouncedHook<FormSettingsConfiguration>(async (data) => {
+      setLoading(true)
+      const result = await updateFormSettingConfiguration(uuidRef.current!,data)
+      setLoading(false)
+      if(result.success === false){
+        toast.error("Something went wrong.")
+      }
+    })
 
   useEffect(() => {
     if (!currentUUID) return;
@@ -94,7 +144,6 @@ export const useFormBuilder = () => {
     value: FormConfigurationType['title'][K]
   ) => {
     setFormHeaderConfiguration((prev) => {
-
       const updated = {
         ...prev,
         title: {
@@ -103,11 +152,10 @@ export const useFormBuilder = () => {
         },
       };
 
-      //setLoading(true);
-
       startTransition(async () => {
-        //debounce(await updateHeaderConfiguration(currentUUID, updated),500)
-        debouncedUpdateRef.current?.(mapTitleToPayload(updated))
+        debounceChangesForFormTitleUpdated.current?.(
+          mapTitleToPayload(updated)
+        );
         setLoading(false);
       });
       return updated;
@@ -117,21 +165,26 @@ export const useFormBuilder = () => {
   const updateDescriptionFormChanges = <
     K extends keyof FormConfigurationType['description'],
   >(
-    formId: string,
     key: K,
     value: FormConfigurationType['description'][K]
   ) => {
-    setFormHeaderConfiguration((prev) =>
-      prev.formId === formId
-        ? {
-            ...prev,
-            description: {
-              ...prev.description,
-              [key]: value,
-            },
-          }
-        : prev
-    );
+    setFormHeaderConfiguration((prev) => {
+      const updated = {
+        ...prev,
+        description: {
+          ...prev.description,
+          [key]: value,
+        },
+      };
+
+      startTransition(async () => {
+        debounceChangesForFormDescriptionUpdated.current?.(
+          mapDescriptionToPayload(updated)
+        );
+        //setLoading(false);
+      });
+      return updated;
+    });
   };
 
   const addQuestion = () => {
@@ -195,14 +248,24 @@ export const useFormBuilder = () => {
     key: 'fontSelected' | 'size',
     designType: DesignType
   ) => {
-    setFormDesignConfiguration((prev) => ({
-      ...prev,
-      [designType]: {
-        ...prev[designType],
-        ...(fontValue !== undefined && { fontSelected: fontValue }),
-        ...(sizeValue !== undefined && { size: sizeValue }),
-      },
-    }));
+    setFormDesignConfiguration((prev) => {
+      const updated = {
+        ...prev,
+        [designType]: {
+          ...prev[designType],
+          ...(fontValue !== undefined && { fontSelected: fontValue }),
+          ...(sizeValue !== undefined && { size: sizeValue }),
+        },
+      };
+
+      startTransition(async () =>
+        debounceChangesForFormDesignConfigurationUpdated.current?.(
+          mapDesignConfigurationtoPayload(updated)
+        )
+      );
+
+      return updated;
+    });
   };
 
   const updateFormSettingChanges = (
@@ -215,11 +278,22 @@ export const useFormBuilder = () => {
       | 'limitResponseToOne',
     value: boolean | string
   ) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setFormSettingConfiguration((prev: any) => ({
-      ...prev,
-      [key]: value,
-    }));
+
+    setFormSettingConfiguration((prev) => {
+      const updated = {
+        ...prev,
+        [key]:value
+      }
+
+      startTransition(() => (
+        debounceChangesForFormSettingConfigurationUpdated.current?.(mapSettingConfigurationToPayload(updated))
+      ))
+
+
+      return updated;
+    })
+
+    
 
     console.log(formSettingConfiguration);
   };
@@ -234,6 +308,48 @@ export const useFormBuilder = () => {
   const handleDesignChanges = () => {
     console.log(selectedShade, selectedTheme);
     console.log(formDesignConfiguration);
+  };
+
+  const handleThemeSelection = (theme: Theme) => {
+    setSelectedTheme(theme);
+    setFormDesignConfiguration((prev) => {
+      const updated = {
+        ...prev,
+        colorConfiguration: {
+          ...prev.colorConfiguration,
+          color: theme.base,
+          background: theme.shades[0],
+        },
+      };
+      startTransition(() => {
+        debounceChangesForFormDesignConfigurationUpdated.current?.(
+          mapDesignConfigurationtoPayload(updated)
+        );
+      });
+      return updated;
+    });
+
+    setSelectedShade(theme.shades[0]);
+  };
+
+  const handleShadeSelection = (shade: string) => {
+    setSelectedShade(shade);
+
+    setFormDesignConfiguration((prev) => {
+      const updated = {
+        ...prev,
+        colorConfiguration: {
+          ...prev.colorConfiguration,
+          background: shade,
+        },
+      };
+      startTransition(() => {
+        debounceChangesForFormDesignConfigurationUpdated.current?.(
+          mapDesignConfigurationtoPayload(updated)
+        );
+      });
+      return updated;
+    });
   };
 
   return {
@@ -266,5 +382,7 @@ export const useFormBuilder = () => {
     updateFormSettingChanges,
     setFormSettingConfiguration,
     formSettingConfiguration,
+    handleThemeSelection,
+    handleShadeSelection
   };
 };

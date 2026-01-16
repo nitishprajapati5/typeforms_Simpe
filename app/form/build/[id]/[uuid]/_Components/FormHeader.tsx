@@ -12,7 +12,6 @@ interface FormHeaderProps {
     value: FormConfigurationType["title"][K]
   ) => void;
   onUpdateDescription: <K extends keyof FormConfigurationType["description"]>(
-    formId: string,
     key: K,
     value: FormConfigurationType["description"][K]
   ) => void;
@@ -101,7 +100,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
         <Textarea
           value={config.description.formDescription}
           placeholder="Enter your Form Description"
-          onChange={(e) => onUpdateDescription(config.formId, "formDescription", e.target.value)}
+          onChange={(e) => onUpdateDescription("formDescription", e.target.value)}
           style={{ textAlign: config.description.DescriptionAlign }}
           className={cn(
             "text-md w-full border-gray-300 focus:border-gray-400 min-h-20",
@@ -120,7 +119,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
               "cursor-pointer p-1 rounded hover:bg-gray-100",
               config.description.isDescriptionBold && "bg-amber-100"
             )}
-            onClick={() => onUpdateDescription(config.formId, "isDescriptionBold", !config.description.isDescriptionBold)}
+            onClick={() => onUpdateDescription("isDescriptionBold", !config.description.isDescriptionBold)}
           />
           <Italic
             role="button"
@@ -129,7 +128,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
               "cursor-pointer p-1 rounded hover:bg-gray-100",
               config.description.isDescriptionItalic && "bg-amber-100"
             )}
-            onClick={() => onUpdateDescription(config.formId, "isDescriptionItalic", !config.description.isDescriptionItalic)}
+            onClick={() => onUpdateDescription( "isDescriptionItalic", !config.description.isDescriptionItalic)}
           />
           <Underline
             role="button"
@@ -138,7 +137,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
               "cursor-pointer p-1 rounded hover:bg-gray-100",
               config.description.isDescriptionUnderline && "bg-amber-100"
             )}
-            onClick={() => onUpdateDescription(config.formId, "isDescriptionUnderline", !config.description.isDescriptionUnderline)}
+            onClick={() => onUpdateDescription( "isDescriptionUnderline", !config.description.isDescriptionUnderline)}
           />
         </div>
       </div>

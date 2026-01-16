@@ -1,5 +1,5 @@
-import { FormConfigurationType } from "../types";
-import { FormTitleConfig,FormDescriptionConfig } from "../types";
+import { FormConfigurationType, FormSettingsConfiguration } from "../types";
+import { FormTitleConfig,FormDescriptionConfig,FormDesignConfiguration } from "../types";
 
 export const mapTitleToPayload = (
     config:FormConfigurationType
@@ -22,3 +22,23 @@ export const mapDescriptionToPayload = (
   isDescriptionUnderline: config.description.isDescriptionUnderline,
   DescriptionAlign: config.description.DescriptionAlign,
 });
+
+export const mapDesignConfigurationtoPayload = (
+  config:FormDesignConfiguration
+):FormDesignConfiguration => ({
+  headerDesign:config.headerDesign,
+  questionDesign:config.questionDesign,
+  textDesign:config.textDesign,
+  headerImage:config.headerImage,
+  colorConfiguration:config.colorConfiguration
+})
+
+export const mapSettingConfigurationToPayload = (config:FormSettingsConfiguration) : FormSettingsConfiguration => ({
+  limitResponseToOne:config.limitResponseToOne,
+  requiredSignIn:config.requiredSignIn,
+  responseConfirmationMessage:config.responseConfirmationMessage,
+  showLinkToSubmitAnotherResponse:config.showLinkToSubmitAnotherResponse,
+  showProgressBar:config.showProgressBar,
+  shuffleQuestionOrder:config.shuffleQuestionOrder,
+  isPublished:config.isPublished
+})
