@@ -1,11 +1,12 @@
 // hooks/.ts
-import { startTransition, useEffect, useState } from 'react';
+import { startTransition, useEffect, useRef, useState } from 'react';
 import {
   Question,
   FormConfigurationType,
   FormDesignConfiguration,
   Theme,
   DesignType,
+  FormTitleConfig,
 } from '../types';
 import {
   INITIAL_FORM_HEADER_CONFIG,
@@ -15,11 +16,17 @@ import {
 import { questionConfigMap } from '../_Utils/utils';
 import { themes } from '../_Utils/utils';
 import { useUUIDClient } from '../_Context/UUIDClientProvider';
-import { initialValuePushToDatabase } from '../_ServerActions/actions';
+import {
+  initialValuePushToDatabase,
+  updateHeaderConfiguration,
+} from '../_ServerActions/actions';
 import { toast } from 'sonner';
+import { UseDebouncedHook } from './useDebounce';
+import { mapTitleToPayload } from '../Mappers/formHeader';
 
 export const useFormBuilder = () => {
   const [formName, setFormName] = useState('My new form');
+  const uuidRef = useRef<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [formDesignConfiguration, setFormDesignConfiguration] =
     useState<FormDesignConfiguration>(INITIAL_DESIGN_CONFIG);
@@ -37,6 +44,21 @@ export const useFormBuilder = () => {
   );
 
   const { currentUUID, setLoading } = useUUIDClient();
+
+  useEffect(() => {
+    uuidRef.current = currentUUID
+  },[currentUUID])
+
+  const debouncedUpdateRef =
+  UseDebouncedHook<FormTitleConfig>(
+    async (data) => {
+      setLoading(true)
+      await updateHeaderConfiguration(uuidRef.current!, data);
+      setLoading(false);
+    },
+    1000
+  );
+
 
   useEffect(() => {
     if (!currentUUID) return;
@@ -58,24 +80,38 @@ export const useFormBuilder = () => {
         toast.error(result.message);
       }
     });
-  }, [currentUUID, formDesignConfiguration, formHeaderConfiguration, formSettingConfiguration, questions, setLoading]);
+  }, [
+    currentUUID,
+    formDesignConfiguration,
+    formHeaderConfiguration,
+    formSettingConfiguration,
+    questions,
+    setLoading,
+  ]);
 
   const updateFormChanges = <K extends keyof FormConfigurationType['title']>(
-    formId: string,
     key: K,
     value: FormConfigurationType['title'][K]
   ) => {
-    setFormHeaderConfiguration((prev) =>
-      prev.formId === formId
-        ? {
-            ...prev,
-            title: {
-              ...prev.title,
-              [key]: value,
-            },
-          }
-        : prev
-    );
+    setFormHeaderConfiguration((prev) => {
+
+      const updated = {
+        ...prev,
+        title: {
+          ...prev.title,
+          [key]: value,
+        },
+      };
+
+      //setLoading(true);
+
+      startTransition(async () => {
+        //debounce(await updateHeaderConfiguration(currentUUID, updated),500)
+        debouncedUpdateRef.current?.(mapTitleToPayload(updated))
+        setLoading(false);
+      });
+      return updated;
+    });
   };
 
   const updateDescriptionFormChanges = <

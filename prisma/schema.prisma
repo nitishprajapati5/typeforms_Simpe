@@ -76,19 +76,19 @@ model FormHeaderConfiguration {
   formId   String @unique @db.ObjectId
   form     FormData @relation(fields: [formId], references: [id], onDelete: Cascade)
 
-  formTitle        String
-  titlePlaceholder String
-  isTitleBold      Boolean @default(false)
-  isTitleItalic   Boolean @default(false)
-  isTitleUnderline Boolean @default(false)
-  titleAlign       String
+  formTitle        String?
+  titlePlaceholder String?
+  isTitleBold      Boolean? @default(false)
+  isTitleItalic   Boolean? @default(false)
+  isTitleUnderline Boolean? @default(false)
+  titleAlign       String?
 
-  formDescription        String
-  descriptionPlaceholder String
-  isDescriptionBold      Boolean @default(false)
-  isDescriptionItalic   Boolean @default(false)
-  isDescriptionUnderline Boolean @default(false)
-  descriptionAlign       String
+  formDescription        String?
+  descriptionPlaceholder String?
+  isDescriptionBold      Boolean? @default(false)
+  isDescriptionItalic   Boolean? @default(false)
+  isDescriptionUnderline Boolean? @default(false)
+  descriptionAlign       String?
 
   @@map("form_header_config")
 }

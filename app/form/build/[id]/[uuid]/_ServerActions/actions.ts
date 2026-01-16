@@ -9,6 +9,7 @@ import {
   FormConfigurationType,
   FormDesignConfiguration,
   FormSettingsConfiguration,
+  FormTitleConfig,
   Question,
 } from '../types';
 import prisma from '@/app/_DatabaseConfiguration/dbConfig';
@@ -20,13 +21,8 @@ export async function initialValuePushToDatabase(
   formSettingConfiguration: FormSettingsConfiguration,
   formDesignConfiguration: FormDesignConfiguration
 ): Promise<ActionResponse> {
+
   const user = await getSession();
-
-  //   if(!uuid){
-  //     redirect("/login")
-  //   }
-
-  console.log('----------Server Side------', uuid);
 
   if (!user) {
     redirect('/login');
@@ -163,5 +159,82 @@ export async function initialValuePushToDatabase(
       success: false,
       message: 'Failed to save form configuration',
     };
+  }
+}
+
+export async function updateHeaderConfiguration(
+  uuid:string,
+  payload:FormTitleConfig
+):Promise<ActionResponse>{
+
+  const user = await getSession();
+
+  console.log(payload)
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  console.log("-----------",uuid)
+
+  const res = await prisma.formData.findUnique({
+    where: { formId: uuid },
+  });
+
+  if (!res) {
+    redirect('/login');
+  }
+
+
+
+    await prisma.formHeaderConfiguration.upsert({
+        where: { formId: res?.id },
+        update: {
+          formTitle: payload.formTitle,
+          titleAlign: payload.TitleAlign,
+          titlePlaceholder: payload.placeholder,
+          isTitleBold: payload.isTitleBold,
+          isTitleItalic: payload.isTitleItalic,
+          isTitleUnderline: payload.isTitleUnderline,
+
+          // formDescription: formHeaderConfiguration.description.formDescription,
+          // descriptionAlign:
+          //   formHeaderConfiguration.description.DescriptionAlign,
+          // descriptionPlaceholder:
+          //   formHeaderConfiguration.description.placeholder,
+          // isDescriptionBold:
+          //   formHeaderConfiguration.description.isDescriptionBold,
+          // isDescriptionItalic:
+          //   formHeaderConfiguration.description.isDescriptionItalic,
+          // isDescriptionUnderline:
+          //   formHeaderConfiguration.description.isDescriptionUnderline,
+        },
+        create: {
+          formId: res?.id,
+
+         formTitle: payload.formTitle,
+          titleAlign: payload.TitleAlign,
+          titlePlaceholder: payload.placeholder,
+          isTitleBold: payload.isTitleBold,
+          isTitleItalic: payload.isTitleItalic,
+          isTitleUnderline: payload.isTitleUnderline,
+
+          // formDescription: formHeaderConfiguration.description.formDescription,
+          // descriptionAlign:
+          //   formHeaderConfiguration.description.DescriptionAlign,
+          // descriptionPlaceholder:
+          //   formHeaderConfiguration.description.placeholder,
+          // isDescriptionBold:
+          //   formHeaderConfiguration.description.isDescriptionBold,
+          // isDescriptionItalic:
+          //   formHeaderConfiguration.description.isDescriptionItalic,
+          // isDescriptionUnderline:
+          //   formHeaderConfiguration.description.isDescriptionUnderline,
+        },
+      });
+
+  return {
+    success:false,
+    message:""
   }
 }

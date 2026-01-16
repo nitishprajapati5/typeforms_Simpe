@@ -70,5 +70,6 @@ export interface FormSettingsConfiguration {
   isPublished:boolean
 }
 
+
 export type DesignKey = "fontSelected" | "size";
 export type DesignType = "headerDesign" | "questionDesign" | "textDesign";

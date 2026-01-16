@@ -8,7 +8,6 @@ import { FormConfigurationType } from '../types';
 interface FormHeaderProps {
   config: FormConfigurationType;
   onUpdateTitle: <K extends keyof FormConfigurationType["title"]>(
-    formId: string,
     key: K,
     value: FormConfigurationType["title"][K]
   ) => void;
@@ -29,7 +28,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
         <Input
           value={config.title.formTitle}
           placeholder="Enter your Form Name"
-          onChange={(e) => onUpdateTitle(config.formId, "formTitle", e.target.value)}
+          onChange={(e) => onUpdateTitle( "formTitle", e.target.value)}
           style={{ textAlign: config.title.TitleAlign }}
           className={cn(
             "text-md w-full border-gray-300 focus:border-gray-400",
@@ -48,7 +47,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
               "cursor-pointer p-1 rounded hover:bg-gray-100",
               config.title.isTitleBold && "bg-amber-100"
             )}
-            onClick={() => onUpdateTitle(config.formId, "isTitleBold", !config.title.isTitleBold)}
+            onClick={() => onUpdateTitle("isTitleBold", !config.title.isTitleBold)}
           />
           <Italic
             role="button"
@@ -57,7 +56,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
               "cursor-pointer p-1 rounded hover:bg-gray-100",
               config.title.isTitleItalic && "bg-amber-100"
             )}
-            onClick={() => onUpdateTitle(config.formId, "isTitleItalic", !config.title.isTitleItalic)}
+            onClick={() => onUpdateTitle( "isTitleItalic", !config.title.isTitleItalic)}
           />
           <Underline
             role="button"
@@ -66,7 +65,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
               "cursor-pointer p-1 rounded hover:bg-gray-100",
               config.title.isTitleUnderline && "bg-amber-100"
             )}
-            onClick={() => onUpdateTitle(config.formId, "isTitleUnderline", !config.title.isTitleUnderline)}
+            onClick={() => onUpdateTitle( "isTitleUnderline", !config.title.isTitleUnderline)}
           />
           <div className="w-px bg-gray-300 mx-1" />
           <AlignLeft
@@ -76,7 +75,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
               "cursor-pointer p-1 rounded hover:bg-gray-100",
               config.title.TitleAlign === "left" && "bg-amber-100"
             )}
-            onClick={() => onUpdateTitle(config.formId, "TitleAlign", "left")}
+            onClick={() => onUpdateTitle( "TitleAlign", "left")}
           />
           <AlignCenter
             role="button"
@@ -85,7 +84,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
               "cursor-pointer p-1 rounded hover:bg-gray-100",
               config.title.TitleAlign === "center" && "bg-amber-100"
             )}
-            onClick={() => onUpdateTitle(config.formId, "TitleAlign", "center")}
+            onClick={() => onUpdateTitle("TitleAlign", "center")}
           />
           <AlignRight
             role="button"
@@ -94,7 +93,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
               "cursor-pointer p-1 rounded hover:bg-gray-100",
               config.title.TitleAlign === "right" && "bg-amber-100"
             )}
-            onClick={() => onUpdateTitle(config.formId, "TitleAlign", "right")}
+            onClick={() => onUpdateTitle("TitleAlign", "right")}
           />
         </div>
 
