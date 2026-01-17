@@ -28,7 +28,8 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
           value={config.title.formTitle}
           placeholder="Enter your Form Name"
           onChange={(e) => onUpdateTitle( "formTitle", e.target.value)}
-          style={{ textAlign: config.title.TitleAlign }}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          style={{ textAlign: config.title.TitleAlign as any  }}
           className={cn(
             "text-md w-full border-gray-300 focus:border-gray-400",
             config.title.isTitleBold && "font-bold",
@@ -101,7 +102,8 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
           value={config.description.formDescription}
           placeholder="Enter your Form Description"
           onChange={(e) => onUpdateDescription("formDescription", e.target.value)}
-          style={{ textAlign: config.description.DescriptionAlign }}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          style={{ textAlign: config.description.DescriptionAlign as any }}
           className={cn(
             "text-md w-full border-gray-300 focus:border-gray-400 min-h-20",
             config.description.isDescriptionBold && "font-bold",

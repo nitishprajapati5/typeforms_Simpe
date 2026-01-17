@@ -30,6 +30,7 @@ import {
   ChangesRequiredState,
   updateQuestionTitleInDatabase,
   updateQuestionOptionsInDatabase,
+  PublishFormToServer,
 } from '../_ServerActions/actions';
 import { toast } from 'sonner';
 import { UseDebouncedHook } from './useDebounce';
@@ -564,10 +565,28 @@ const updateQuestionTitle = (id: string, title: string) => {
   };
 
   const handlePublishEvent = () => {
-    console.log(formHeaderConfiguration);
-    console.log(questions);
-    console.log(formSettingConfiguration);
-    console.log(formDesignConfiguration);
+    
+    startTransition(async () => {
+      setLoading(true)
+      
+      const result = await PublishFormToServer(
+        uuidRef.current!,
+        formHeaderConfiguration,
+        formSettingConfiguration,
+        formDesignConfiguration,
+        questions
+      )
+
+      if(result.success === false){
+        toast.error(result.message)
+      }
+
+      if(result.success){
+        toast.success(result.message)
+      }
+      setLoading(false)
+    })
+
   };
 
   const handleDesignChanges = () => {

@@ -255,9 +255,6 @@ export const DesignSheet = ({
         </div>
 
         <SheetFooter>
-          <Button type="submit" onClick={onSave}>
-            Save changes
-          </Button>
           <SheetClose asChild>
             <Button variant="outline">Close</Button>
           </SheetClose>
