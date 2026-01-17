@@ -1,6 +1,8 @@
 // "use client";
 
+import prisma from "@/app/_DatabaseConfiguration/dbConfig";
 import UUIDClient from "./_Components/UUIDClient";
+import { redirect } from "next/navigation";
 
 // import { useState } from "react";
 // import { Button } from "@/components/ui/button";
@@ -151,6 +153,33 @@ interface UUIDPageProps {
 
 export default async function UUIDPage({params}:UUIDPageProps){
   const {uuid} = await params;
+
+  const getWorkSpaceId = await prisma.formData.findUnique({
+    where:{
+      formId:uuid
+    }
+  })
+
+
+  console.log(getWorkSpaceId?.id)
+
+  if(!getWorkSpaceId){
+    redirect("/login")
+  }
+
+const data = await prisma.formData.findUnique({
+  where: {
+    formId: uuid 
+  },
+  include: {
+    formDesign: true,
+    formSettings: true,
+    headerConfig: true,
+    questions: true  
+  }
+});
+  console.log("data from backend",data)
+
   return (
     <UUIDClient uuid={uuid} />
   )

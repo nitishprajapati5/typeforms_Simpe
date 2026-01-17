@@ -4,7 +4,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Bold, Italic, Underline, AlignCenter, AlignLeft, AlignRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FormConfigurationType } from '../types';
-import { debounce } from "lodash";
 
 interface FormHeaderProps {
   config: FormConfigurationType;
@@ -28,7 +27,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
         <Input
           value={config.title.formTitle}
           placeholder="Enter your Form Name"
-          onChange={(e) => debounce(() => onUpdateTitle( "formTitle", e.target.value),100)}
+          onChange={(e) => onUpdateTitle( "formTitle", e.target.value)}
           style={{ textAlign: config.title.TitleAlign }}
           className={cn(
             "text-md w-full border-gray-300 focus:border-gray-400",
@@ -101,7 +100,7 @@ export const FormHeader = ({ config, onUpdateTitle, onUpdateDescription }: FormH
         <Textarea
           value={config.description.formDescription}
           placeholder="Enter your Form Description"
-          onChange={(e) => debounce(() => onUpdateDescription("formDescription", e.target.value),100)}
+          onChange={(e) => onUpdateDescription("formDescription", e.target.value)}
           style={{ textAlign: config.description.DescriptionAlign }}
           className={cn(
             "text-md w-full border-gray-300 focus:border-gray-400 min-h-20",

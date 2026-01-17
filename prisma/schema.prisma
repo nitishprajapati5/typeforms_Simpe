@@ -111,7 +111,7 @@ model FormQuestions{
 model FormSettingConfiguration{
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  formId String @db.ObjectId @unique
+  formId String @unique @db.ObjectId
   form FormData @relation(fields: [formId],references: [id],onDelete:Cascade)
 
   limitResponseToOne Boolean
@@ -127,7 +127,7 @@ model FormSettingConfiguration{
 model FormDesignConfigurationSetting{
    id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  formId String @db.ObjectId @unique
+  formId String @unique @db.ObjectId
   form FormData @relation(fields: [formId],references: [id],onDelete:Cascade)
 
   colorConfiguration Json
