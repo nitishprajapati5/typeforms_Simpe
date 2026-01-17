@@ -71,7 +71,7 @@ export default function CustomSidebar({
               "
               title={csp.workspacename}
             >
-              <Link href={`/workspace/home/${csp.id}`}>
+              <Link href={`/workspace/home/${csp.id}?page=${1}`}>
                 {csp.workspacename}
               </Link>
             </div>

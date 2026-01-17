@@ -19,14 +19,25 @@ import { useWorkSpaceBuilder } from '../../hooks/useWorkSpaceBuilder';
 import WorkSpaceNameChangeDialog from '../../_WorkspaceComponents/WorkSpaceNameChangeDialog';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { TworkSpaceFormDetails } from '../../types/TworkSpaceFormDetail';
+import { WorkSpaceFormsTable } from '../_ClientComponents/WorkSpaceFormsTable';
 
 interface HomeClientProps {
-  workspaceId: string;
+  // workspaceId: string;
+  // initialWorkSpaceName: string;
+  // formHeaderDetails:TworkSpaceFormDetails
   initialWorkSpaceName: string;
+  forms: TworkSpaceFormDetails;
+  currentPage: number;
+  totalPages: number;
+  workspaceId: string;
 }
 
 export default function HomeClient({
   workspaceId,
+  forms,
+  totalPages,
+  currentPage,
   initialWorkSpaceName,
 }: HomeClientProps) {
   const router = useRouter();
@@ -34,7 +45,7 @@ export default function HomeClient({
     useWorkSpaceBuilder();
 
   return (
-    <div className="min-h-screen flex flex-col p-4">
+    <div className="min-h-screen flex flex-col p-4 overflow-auto">
       <div className="flex flex-row items-center gap-2 justify-between">
         <div className="flex flex-row items-center gap-2">
           <div>
@@ -82,9 +93,12 @@ export default function HomeClient({
         </Button>
       </div>
 
-      <div className="flex flex-1 items-center justify-center">
-        <Image src="/empty-box.svg" alt="Emplty Box" height={400} width={400} />
-      </div>
+      <WorkSpaceFormsTable
+        forms={forms}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        workspaceId={workspaceId}
+      />
 
       <WorkSpaceNameChangeDialog
         isOpen={isDialogOpen}
