@@ -96,18 +96,16 @@ model FormHeaderConfiguration {
 
 model FormQuestions{
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  uuid String 
+  uuid String @default(uuid()) @unique
 
   required Boolean
-  title String
+  title String?
   type String
   options Json
 
   formId String @db.ObjectId
   form FormData @relation(fields: [formId],references: [id],onDelete:Cascade)
 
-  @@index([uuid])
-  @@unique([uuid,formId])
 }
 
 model FormSettingConfiguration{

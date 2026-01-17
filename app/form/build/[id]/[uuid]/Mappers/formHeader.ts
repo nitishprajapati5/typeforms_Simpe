@@ -1,4 +1,4 @@
-import { FormConfigurationType, FormSettingsConfiguration } from "../types";
+import { FormConfigurationType, FormSettingsConfiguration, Question } from "../types";
 import { FormTitleConfig,FormDescriptionConfig,FormDesignConfiguration } from "../types";
 
 export const mapTitleToPayload = (
@@ -41,4 +41,11 @@ export const mapSettingConfigurationToPayload = (config:FormSettingsConfiguratio
   showProgressBar:config.showProgressBar,
   shuffleQuestionOrder:config.shuffleQuestionOrder,
   isPublished:config.isPublished
+})
+
+export const mapQuestionToPayload = (config:Omit<Question, 'id'>):Omit<Question, 'id'> => ({
+  title: config.title,
+  type: config.type,
+  config: config.config,
+  required: config.required,
 })

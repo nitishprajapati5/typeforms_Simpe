@@ -24,6 +24,10 @@ import {
   updateFormSettingConfiguration,
   updateHeaderDescriptionConfiguration,
   updateHeaderTitleConfiguration,
+  createQuestionInDatabase,
+  deleteQuestionFromDatabase,
+  upsertQuestionInDatabase,
+  ChangesRequiredState,
 } from '../_ServerActions/actions';
 import { toast } from 'sonner';
 import { UseDebouncedHook } from './useDebounce';
@@ -100,12 +104,16 @@ export const useFormBuilder = () => {
       }
     });
 
-    const debounceChangesForFormSettingConfigurationUpdated = 
+
+
+  const debounceChangesForFormSettingConfigurationUpdated =
     UseDebouncedHook<FormSettingsConfiguration>(async (data) => {
       setLoading(true)
-      const result = await updateFormSettingConfiguration(uuidRef.current!,data)
+
+
+      const result = await updateFormSettingConfiguration(uuidRef.current!, data)
       setLoading(false)
-      if(result.success === false){
+      if (result.success === false) {
         toast.error("Something went wrong.")
       }
     })
@@ -119,7 +127,6 @@ export const useFormBuilder = () => {
       const result = await initialValuePushToDatabase(
         currentUUID,
         formHeaderConfiguration,
-        questions,
         formSettingConfiguration,
         formDesignConfiguration
       );
@@ -181,66 +188,278 @@ export const useFormBuilder = () => {
         debounceChangesForFormDescriptionUpdated.current?.(
           mapDescriptionToPayload(updated)
         );
-        //setLoading(false);
       });
       return updated;
     });
   };
 
-  const addQuestion = () => {
-    if (!selectedTypeOfQuestion || !newQuestionTitle.trim()) {
-      alert('Please enter a question title and select a type');
-      return;
-    }
+  // const addQuestion = () => {
+  //   if (!selectedTypeOfQuestion || !newQuestionTitle.trim()) {
+  //     alert('Please enter a question title and select a type');
+  //     return;
+  //   }
 
-    const newQuestion: Question = {
-      id: crypto.randomUUID(),
-      title: newQuestionTitle,
-      type: selectedTypeOfQuestion,
-      config: questionConfigMap[selectedTypeOfQuestion] || {},
-      required: false,
-    };
+  //   const newQuestion: Question = {
+  //     id: crypto.randomUUID(),
+  //     title: newQuestionTitle,
+  //     type: selectedTypeOfQuestion,
+  //     config: questionConfigMap[selectedTypeOfQuestion] || {},
+  //     required: false,
+  //   };
 
-    setQuestions((prev) => [...prev, newQuestion]);
-    setNewQuestionTitle('');
-    setSelectedTypeOfQuestion('');
+  //   console.log(newQuestion)
+
+  //   startTransition(async () => {
+  //     debounceChangesForQuestionUpdate.current?.(mapQuestionToPayload(newQuestion))
+  //   })
+
+  //   setQuestions((prev) => [...prev, newQuestion]);
+  //   setNewQuestionTitle('');
+  //   setSelectedTypeOfQuestion('');
+  // };
+
+  // const addQuestion = async () => {
+  //   if (!selectedTypeOfQuestion || !newQuestionTitle.trim()) {
+  //     alert('Please enter a question title and select a type');
+  //     return;
+  //   }
+
+  //   const questionData: Omit<Question, 'id'> = {
+  //     title: newQuestionTitle,
+  //     type: selectedTypeOfQuestion,
+  //     config: questionConfigMap[selectedTypeOfQuestion] || {},
+  //     required: false,
+  //   };
+
+  //   startTransition(async () => {
+  //     debounceChangesForQuestionUpdate.current?.(mapQuestionToPayload(questionData))
+  //   });
+
+  //   setQuestions((prev) => [...prev, questionData]);
+
+  // };
+
+  const addQuestion = async () => {
+  if (!selectedTypeOfQuestion || !newQuestionTitle.trim()) {
+    alert('Please enter a question title and select a type');
+    return;
+  }
+
+  const questionData: Omit<Question, 'id'> = {
+    title: newQuestionTitle,
+    type: selectedTypeOfQuestion,
+    config: questionConfigMap[selectedTypeOfQuestion] || {},
+    required: false,
   };
+
+  startTransition(async () => {
+    setLoading(true);
+    const result = await createQuestionInDatabase(uuidRef.current!, questionData);
+    setLoading(false);
+
+    if (result.success && result.data) {
+      setQuestions((prev) => [...prev, result.data!]);
+      setNewQuestionTitle('');
+      setSelectedTypeOfQuestion('');
+      toast.success('Question added');
+    } else {
+      toast.error(result.message || 'Failed to add question');
+    }
+  });
+};
+
+  // const updateQuestionTitle = (id: string, title: string) => {
+  //   startTransition(() => {
+  //     setQuestions((prev) =>
+  //       prev.map((q) => (q.id === id ? { ...q, title } : q))
+  //     );
+  //   });
+
+  //   debounceChangesForSingleQuestionUpdate.current?.({ id, title });
+
+  // };
 
   const updateQuestionTitle = (id: string, title: string) => {
-    setQuestions((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, title } : q))
-    );
-  };
+  const question = questions.find(q => q.id === id);
+  
+  if (!question) {
+    toast.error("Question not found");
+    return;
+  }
 
-  const updateQuestionRequired = (id: string, required: boolean) => {
-    setQuestions((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, required } : q))
-    );
-  };
+  // Store previous state for potential revert
+  const previousTitle = question.title;
 
-  const deleteQuestion = (id: string) => {
-    setQuestions((prev) => prev.filter((q) => q.id !== id));
-  };
+  // Optimistic update (no need for startTransition here)
+  setQuestions((prev) =>
+    prev.map((q) => (q.id === id ? { ...q, title } : q))
+  );
 
-  const duplicateQuestion = (id: string) => {
-    const questionToDuplicate = questions.find((q) => q.id === id);
-    if (questionToDuplicate) {
-      const newQuestion = {
-        ...questionToDuplicate,
-        id: crypto.randomUUID(),
-        title: `${questionToDuplicate.title} (Copy)`,
-      };
-      setQuestions((prev) => [...prev, newQuestion]);
+  // Debounce database update with revert capability
+  startTransition(async () => {
+    setLoading(true);
+    
+    const result = await upsertQuestionInDatabase(uuidRef.current!, {
+      id,
+      title,
+    });
+    
+    setLoading(false);
+
+    if (result.success && result.data) {
+      // Sync with database response
+      setQuestions((prev) =>
+        prev.map((q) => (q.id === id ? result.data! : q))
+      );
+    } else {
+      // Revert to previous state on failure
+      setQuestions((prev) =>
+        prev.map((q) => 
+          q.id === id ? { ...q, title: previousTitle } : q
+        )
+      );
+      toast.error(result.message || "Failed to update title");
     }
+  });
+};
+
+  // const updateQuestionRequired = (id: string, required: boolean) => {
+  //   // Update local state immediately
+  //   setQuestions((prev) =>
+  //     prev.map((q) => (q.id === id ? { ...q, required } : q))
+  //   );
+
+  //   // Persist to database
+  //   const question = questions.find(q => q.id === id);
+  //   if (question) {
+  //     startTransition(async () => {
+  //       debounceChangesForSingleQuestionUpdate.current?.({
+  //         id,
+  //         required,
+  //       });
+  //     });
+  //   }
+  // };
+
+const updateQuestionRequired = (id: string, required: boolean) => {
+  const previousQuestion = questions.find(q => q.id === id);
+  
+  if (!previousQuestion) {
+    toast.error("Question not found");
+    return;
+  }
+
+  const previousRequired = previousQuestion.required;
+
+  setQuestions((prev) =>
+    prev.map((q) => (q.id === id ? { ...q, required } : q))
+  );
+
+  startTransition(async () => {
+    setLoading(true);
+    
+    const result = await ChangesRequiredState(uuidRef.current!, 
+      id,
+      required, // Your upsert already handles this
+    );
+    
+    setLoading(false);
+
+    if (result.success && result.data) {
+      setQuestions((prev) =>
+        prev.map((q) => (q.id === id ? result.data! : q))
+      );
+    } else {
+      setQuestions((prev) =>
+        prev.map((q) => 
+          q.id === id ? { ...q, required: previousRequired } : q
+        )
+      );
+      toast.error(result.message || "Failed to update question");
+    }
+  });
+};
+
+  const deleteQuestion = async (id: string) => {
+    setQuestions((prev) => prev.filter((q) => q.id !== id));
+    startTransition(async () => {
+      setLoading(true);
+      const result = await deleteQuestionFromDatabase(uuidRef.current!, id);
+      setLoading(false);
+
+      if (result.success === false) {
+        toast.error("Failed to delete question");
+        const deletedQuestion = questions.find(q => q.id === id);
+        if (deletedQuestion) {
+          setQuestions((prev) => [...prev, deletedQuestion]);
+        }
+      } else {
+        toast.success("Question deleted");
+      }
+    });
   };
+
+  const duplicateQuestion = async (id: string) => {
+    const questionToDuplicate = questions.find((q) => q.id === id);
+    if (!questionToDuplicate) return;
+
+    const newQuestion: Omit<Question, 'id'> = {
+      title: `${questionToDuplicate.title} (Copy)`,
+      type: questionToDuplicate.type,
+      config: { ...questionToDuplicate.config },
+      required: questionToDuplicate.required,
+    };
+
+    startTransition(async () => {
+      setLoading(true);
+      const result = await createQuestionInDatabase(uuidRef.current!, newQuestion);
+      setLoading(false);
+
+      if (result.success && result.data) {
+        setQuestions((prev) => [...prev, result.data!]);
+        toast.success("Question duplicated");
+      } else {
+        toast.error("Failed to duplicate question");
+      }
+    });
+  };
+
 
   const updateQuestionOptions = (id: string, options: string[]) => {
-    setQuestions((prev) =>
-      prev.map((q) =>
-        q.id === id ? { ...q, config: { ...q.config, options } } : q
-      )
-    );
-  };
+  const question = questions.find(q => q.id === id);
+  if (!question) return;
+
+  // Optimistic update
+  setQuestions((prev) =>
+    prev.map((q) =>
+      q.id === id ? { ...q, config: { ...q.config, options } } : q
+    )
+  );
+
+  startTransition(async () => {
+    setLoading(true);
+    
+    const result = await upsertQuestionInDatabase(uuidRef.current!, {
+      id,
+      config: { ...question.config, options },
+    });
+    
+    setLoading(false);
+
+    if (result.success && result.data) {
+      setQuestions((prev) =>
+        prev.map((q) => (q.id === id ? result.data! : q))
+      );
+    } else {
+      setQuestions((prev) =>
+        prev.map((q) =>
+          q.id === id ? { ...q, config: question.config } : q
+        )
+      );
+      toast.error(result.message || "Failed to update options");
+    }
+  });
+};
 
   const updateDesignConfiguration = (
     fontValue: string | undefined,
@@ -282,7 +501,7 @@ export const useFormBuilder = () => {
     setFormSettingConfiguration((prev) => {
       const updated = {
         ...prev,
-        [key]:value
+        [key]: value
       }
 
       startTransition(() => (
@@ -293,7 +512,7 @@ export const useFormBuilder = () => {
       return updated;
     })
 
-    
+
 
     console.log(formSettingConfiguration);
   };
