@@ -24,14 +24,16 @@ import { DesignSettingSheet } from "./DesignSettingSheet";
 import { useFormBuilder } from "../hooks/useBuilder";
 import { FormNavbar } from "./FormNavbar";
 import { useUUIDClient } from "../_Context/UUIDClientProvider";
+import { FormResponseFromDatabase } from "../types";
 
 interface UUIDClientProps{
-    uuid:string
+    uuid:string,
+    data:FormResponseFromDatabase
 }
 
-export default function UUIDClient({uuid}:UUIDClientProps) {
+export default function UUIDClient({uuid,data}:UUIDClientProps) {
 
-  console.log(uuid)
+  //console.log(uuid)
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -75,7 +77,7 @@ export default function UUIDClient({uuid}:UUIDClientProps) {
     formSettingConfiguration,
     handleShadeSelection,
     handleThemeSelection
-  } = useFormBuilder();
+  } = useFormBuilder({initialData:data});
 
   return (
     <div className="w-full overflow-y-auto min-h-screen bg-gray-50">

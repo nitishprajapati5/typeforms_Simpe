@@ -39,8 +39,6 @@ export async function initialValuePushToDatabase(
 
   try {
     await prisma.$transaction(async (tx) => {
-      // 1️⃣ Form Header Configuration
-
       await tx.formHeaderConfiguration.upsert({
         where: { formId: res?.id },
         update: {
@@ -418,50 +416,6 @@ export async function updateByAddingQuestionToDatabase(
   }
 }
 
-export async function updateSingleQuestionToDatabase(
-  uuid: string,
-  payload: Partial<Pick<Question,"title" | "id">>
-): Promise<ActionResponse> {
-  try {
-      const user = await getSession();
-
-    console.log(payload);
-
-    if (!user) {
-      redirect('/login');
-    }
-
-    const res = await prisma.formData.findUnique({
-      where: { formId: uuid },
-    });
-
-    if (!res) {
-      redirect('/login');
-    }
-
-    await prisma.formQuestions.update({
-      where:{
-        uuid:payload.id,
-        formId:res.id
-      },
-      data:{
-        title:payload.title,
-      }
-    })
-
-    return {
-      success: true,
-      message: ""
-    }
-  } catch (error) {
-    console.log(error)
-    return {
-      success: false,
-      message: ""
-    }
-  }
-}
-
 export async function createQuestionInDatabase(
   formUuid: string,
   questionData: Omit<Question, 'id'>
@@ -506,10 +460,10 @@ export async function createQuestionInDatabase(
       message: "Failed to create question" 
     };
   }
-}
+};
 
 export async function ChangesRequiredState(
-  formUuid: string,
+  uuid: string,
   questionId: string,
   required: boolean
 ): Promise<ActionResponse<Question>> {
@@ -517,25 +471,28 @@ export async function ChangesRequiredState(
     const user = await getSession();
     if (!user) redirect('/login');
 
-    const form = await prisma.formData.findUnique({
-      where: { formId: formUuid },
-    });
-    if (!form) redirect('/login');
+    console.log("UUID",uuid)
+    console.log("QuestionID",questionId)
+    console.log("Required Value",required)
 
     const existingQuestion = await prisma.formQuestions.findUnique({
-      where: { uuid: questionId },
-    });
+      where:{
+        id:questionId,
+        //uuid:uuid
+      }
+    })
 
-    if (!existingQuestion || existingQuestion.formId !== form.id) {
+    if (!existingQuestion) {
       return {
         success: false,
-        message: "Question not found or unauthorized",
+        message: "Question Not Found",
       };
     }
 
     const updated = await prisma.formQuestions.update({
-      where: {
-        uuid: questionId,
+       where:{
+        id:questionId,
+        //uuid:uuid
       },
       data: {
         required: required,
@@ -543,18 +500,40 @@ export async function ChangesRequiredState(
     });
 
     const question: Question = {
-      id: updated.uuid,
+      id: updated.id,
       title: updated.title!,
       type: updated.type,
       required: updated.required,
       config: updated.options as Question['config'],
     };
 
+    {
+//   "_id": {
+//     "$oid": "696bb5a19c526cdcf55804a0"
+//   },
+//   "uuid": "57500457-026e-4309-81b0-79054dd30ad7",
+//   "required": true,
+//   "title": "Adding New Question #3",
+//   "type": "Drop Down",
+//   "options": {
+//     "options": [
+//       "Option 1",
+//       "Option 2",
+//       "Option 3"
+//     ]
+//   },
+//   "formId": {
+//     "$oid": "696b6d99352e9ffb281eae9b"
+//   }
+// }
+
+
     return {
       success: true,
       message: "Required state updated successfully",
       data: question,
-    };
+    }
+  }
   } catch (error) {
     console.error("Error updating required state:", error);
     return {
@@ -564,58 +543,125 @@ export async function ChangesRequiredState(
   }
 }
 
-export async function upsertQuestionInDatabase(
-  formUuid: string,
-  payload: Partial<Question> & { id: string } 
-): Promise<ActionResponse<Question>> {
-  try {
-    const user = await getSession();
+
+export async function updateQuestionOptionsInDatabase(
+  uuid:string,
+  questionId:string,
+  config:Question["config"]
+){
+   try{
+   const user = await getSession();
     if (!user) redirect('/login');
 
-    const form = await prisma.formData.findUnique({
-      where: { formId: formUuid },
-    });
-    if (!form) redirect('/login');
+    console.log("UUID",uuid)
+    console.log("QuestionID",questionId)
 
-    const updated = await prisma.formQuestions.upsert({
-      where: {
-        uuid: payload.id,
+    const existingQuestion = await prisma.formQuestions.findUnique({
+      where:{
+        id:questionId,
+      }
+    })
+
+    if (!existingQuestion) {
+      return {
+        success: false,
+        message: "Question Not Found",
+      };
+    }
+
+    const updated = await prisma.formQuestions.update({
+       where:{
+        id:questionId,
       },
-      update: {
-        ...(payload.title && { title: payload.title }),
-        ...(payload.type && { type: payload.type }),
-        ...(payload.required !== undefined && { required: payload.required }),
-        ...(payload.config && { options: payload.config }),
-      },
-      create: {
-        uuid: payload.id,
-        title: payload.title!,
-        type: payload.type!,
-        required: payload.required ?? false,
-        options: payload.config || {},
-        formId: form.id,
+      data: {
+        options: config,
       },
     });
+
+    console.log(updated)
 
     const question: Question = {
-      id: updated.uuid,
+      id: updated.id,
       title: updated.title!,
       type: updated.type,
       required: updated.required,
       config: updated.options as Question['config'],
     };
 
+  
     return {
       success: true,
-      message: "Question saved successfully",
+      message: "Required state updated successfully",
       data: question,
-    };
-  } catch (error) {
-    console.error("Error upserting question:", error);
+    }
+  }catch (error) {
+    console.error("Error updating required state:", error);
     return {
       success: false,
-      message: "Failed to save question",
+      message: "Failed to update required state",
     };
+   
+  }
+}
+
+
+export async function updateQuestionTitleInDatabase(
+  uuid: string,
+  questionId: string,
+  title:string
+): Promise<ActionResponse<Question>> {
+  try{
+   const user = await getSession();
+    if (!user) redirect('/login');
+
+    console.log("UUID",uuid)
+    console.log("QuestionID",questionId)
+
+    const existingQuestion = await prisma.formQuestions.findUnique({
+      where:{
+        id:questionId,
+      }
+    })
+
+    if (!existingQuestion) {
+      return {
+        success: false,
+        message: "Question Not Found",
+      };
+    }
+
+    const updated = await prisma.formQuestions.update({
+       where:{
+        id:questionId,
+      },
+      data: {
+        title: title,
+      },
+    });
+
+    console.log(updated)
+
+    const question: Question = {
+      id: updated.id,
+      title: updated.title!,
+      type: updated.type,
+      required: updated.required,
+      config: updated.options as Question['config'],
+    };
+
+  
+    return {
+      success: true,
+      message: "Required state updated successfully",
+      data: question,
+    }
+  }catch (error) {
+    console.error("Error updating required state:", error);
+    return {
+      success: false,
+      message: "Failed to update required state",
+    };
+   
   }
 }
 

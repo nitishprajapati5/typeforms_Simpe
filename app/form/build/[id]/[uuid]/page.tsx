@@ -178,9 +178,16 @@ const data = await prisma.formData.findUnique({
     questions: true  
   }
 });
+
+if(!data){
+  redirect("/login")
+}
   console.log("data from backend",data)
 
   return (
-    <UUIDClient uuid={uuid} />
+    <UUIDClient 
+      uuid={uuid} 
+      data={data}
+    />
   )
 }
