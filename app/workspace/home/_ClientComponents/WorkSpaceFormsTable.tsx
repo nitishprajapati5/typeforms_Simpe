@@ -17,7 +17,7 @@ export const WorkSpaceFormsTable = ({
   totalPages,
   workspaceId,
 }: Props) => {
-  if (!forms) {
+  if (!forms || forms.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-12">
         <Image
@@ -59,7 +59,7 @@ export const WorkSpaceFormsTable = ({
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-4">
                     <Link
-                      href={`/form/build/${form.formId}`}
+                      href={`/form/build/${form.workspaceId}/${form.formId}`}
                       className="text-primary hover:opacity-80"
                     >
                       <Edit2 size={16} />

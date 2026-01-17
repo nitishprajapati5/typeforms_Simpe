@@ -35,25 +35,6 @@ export default async function Page({ params, searchParams }: PageProps) {
     },
   });
 
-  // const workSpaceForms = await prisma.formData.findMany({
-  //   where: {
-  //     workspaceId: id,
-  //     userId: user.id,
-  //   },
-  //   select: {
-  //     id: true,
-  //     formId: true,
-  //     workspaceId: true,
-  //     userId: true,
-  //     headerConfig: {
-  //       select: {
-  //         formTitle: true,
-  //         id:true
-  //       },
-  //     },
-  //   },
-  // });
-
   const data = await getWorkSpaceForms({
     workspaceId: id,
     userId: user.id,

@@ -182,7 +182,8 @@ export async function updateHeaderTitleConfiguration(
     redirect('/login');
   }
 
-  await prisma.formHeaderConfiguration.upsert({
+ try {
+   await prisma.formHeaderConfiguration.upsert({
     where: { formId: res?.id },
     update: {
       formTitle: payload.formTitle,
@@ -205,9 +206,16 @@ export async function updateHeaderTitleConfiguration(
   });
 
   return {
-    success: false,
+    success: true,
     message: '',
   };
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+ } catch (error:unknown) {
+    return {
+      success:false,
+      message:"Something went wrong"
+    }
+ }
 }
 
 export async function updateHeaderDescriptionConfiguration(
@@ -256,8 +264,9 @@ export async function updateHeaderDescriptionConfiguration(
       success: true,
       message: '',
     };
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error:any) {
+    console.log(error)
     return {
       success: false,
       message: 'Something went wrong',

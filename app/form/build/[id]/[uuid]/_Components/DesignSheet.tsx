@@ -81,7 +81,7 @@ export const DesignSheet = ({
             <div className="flex flex-1 gap-2">
               <Select
                 value={designConfig.headerDesign.fontSelected}
-                onValueChange={(value) => onUpdateDesign(value, undefined, "fontSelected", "headerDesign")}
+                onValueChange={(value) =>  onUpdateDesign(value, undefined, "fontSelected", "headerDesign")}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Font" />
@@ -142,7 +142,7 @@ export const DesignSheet = ({
 
               <Select
                 value={designConfig.questionDesign.size.toString()}
-                onValueChange={(value) => onUpdateDesign(undefined, Number(value), "size", "questionDesign")}
+                onValueChange={(value) =>  onUpdateDesign(undefined, Number(value), "size", "questionDesign")}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Size" />
@@ -239,7 +239,7 @@ export const DesignSheet = ({
                     <div className="relative" key={shade}>
                       <Button
                         onClick={() => {
-                          onShadeSelect(shade)
+                           onShadeSelect(shade)
                           handleShadeSelection(shade)
                         }}
                         className="h-4 p-4"

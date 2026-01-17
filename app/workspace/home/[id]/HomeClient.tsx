@@ -14,7 +14,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import Image from 'next/image';
 import { useWorkSpaceBuilder } from '../../hooks/useWorkSpaceBuilder';
 import WorkSpaceNameChangeDialog from '../../_WorkspaceComponents/WorkSpaceNameChangeDialog';
 import { Button } from '@/components/ui/button';
@@ -23,9 +22,6 @@ import { TworkSpaceFormDetails } from '../../types/TworkSpaceFormDetail';
 import { WorkSpaceFormsTable } from '../_ClientComponents/WorkSpaceFormsTable';
 
 interface HomeClientProps {
-  // workspaceId: string;
-  // initialWorkSpaceName: string;
-  // formHeaderDetails:TworkSpaceFormDetails
   initialWorkSpaceName: string;
   forms: TworkSpaceFormDetails;
   currentPage: number;

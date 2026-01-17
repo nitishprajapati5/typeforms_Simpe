@@ -31,7 +31,7 @@ interface UUIDClientProps{
 
 export default function UUIDClient({uuid}:UUIDClientProps) {
 
-  console.log(uuid)
+  //console.log(uuid)
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
