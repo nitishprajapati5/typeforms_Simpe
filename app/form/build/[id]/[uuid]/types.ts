@@ -1,5 +1,3 @@
-import { JsonValue } from "@prisma/client/runtime/library";
-
 // types.ts
 export interface Theme {
   id: string;
@@ -28,7 +26,6 @@ export interface FormTitleConfig {
   isTitleBold: boolean;
   isTitleItalic: boolean;
   isTitleUnderline: boolean;
-  //TitleAlign: "left" | "center" | "right";
   TitleAlign:string | null
 }
 
@@ -38,7 +35,6 @@ export interface FormDescriptionConfig {
   isDescriptionBold: boolean;
   isDescriptionItalic: boolean;
   isDescriptionUnderline: boolean;
-  //DescriptionAlign: "left" | "center" | "right";
   DescriptionAlign:string | null
 }
 
@@ -149,6 +145,27 @@ export type FormResponseFromDatabase = {
   headerConfig: FormResponseFromDatabaseHeaderConfig | null;
   questions: FormResponseFromDatabaseQuestion[];
 };
+
+export type JsonArray = {
+    [n: number]: JsonValue;
+    length: number;
+};
+export type JsonObject = {
+    [x: string]: JsonValue | undefined;
+}
+
+export type JsonValue = string | number | boolean | JsonObject | JsonArray | null
+
+export interface ColorConfig {
+  color: string;
+  background: string;
+}
+
+export interface HeaderDesign {
+  fontSelected: string;
+  size: number;
+}
+
 
 export type DesignKey = "fontSelected" | "size";
 export type DesignType = "headerDesign" | "questionDesign" | "textDesign";

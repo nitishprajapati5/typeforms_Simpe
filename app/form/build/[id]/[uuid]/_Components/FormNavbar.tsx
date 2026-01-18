@@ -57,16 +57,14 @@ export const FormNavbar = ({
           </Button>) : (<Button className="cursor-pointer bg-green-800" onClick={onPublish}>
             Publish
           </Button>)}
-          {/* <Button className="cursor-pointer bg-green-800" onClick={onPublish}>
-            Publish
-          </Button> */}
+         
           <Settings2Icon
             onClick={onSettingClick}
             className="cursor-pointer"
             size={20}
           />
           <EyeIcon
-            onClick={() => router.push("/form/preview")}
+            onClick={() => router.push(`/form/preview/${uuid}`)}
             className="cursor-pointer"
             size={20}
           />
