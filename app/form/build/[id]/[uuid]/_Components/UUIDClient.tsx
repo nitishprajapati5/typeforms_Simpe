@@ -87,6 +87,8 @@ export default function UUIDClient({uuid,data}:UUIDClientProps) {
         onPublish={handlePublishEvent}
         onDesignClick={() => setIsSheetOpen(!isSheetOpen)}
         onSettingClick={() => setSettingSheetOpen(!isSettingSheetOpen)}
+        isPublished={data.formSettings?.isPublished ?? false}
+        uuid={uuid}
       />
 
       <div className="mt-8 flex flex-col items-center gap-6 px-4 pb-20">

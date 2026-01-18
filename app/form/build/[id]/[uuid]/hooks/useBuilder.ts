@@ -138,6 +138,7 @@ export const useFormBuilder = ({ initialData }: UseFormBuilderProps) => {
   const [selectedTypeOfQuestion, setSelectedTypeOfQuestion] = useState('');
 
   const [isSettingSheetOpen, setSettingSheetOpen] = useState(false);
+  const [isPublished,setIsPublished] = useState<boolean>(false)
 
 
   const { currentUUID, setLoading } = useUUIDClient();
@@ -667,6 +668,8 @@ const updateQuestionTitle = (id: string, title: string) => {
     setFormSettingConfiguration,
     formSettingConfiguration,
     handleThemeSelection,
-    handleShadeSelection
+    handleShadeSelection,
+    isPublished,
+    setIsPublished
   };
 };

@@ -1,4 +1,3 @@
-// components/FormNavbar.tsx
 import { Button } from "@/components/ui/button";
 import {
   FormInput,
@@ -10,6 +9,8 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useUUIDClient } from "../_Context/UUIDClientProvider";
+import ShareDialog from "./PublishDialog";
+import { useState } from "react";
 
 interface FormNavbarProps {
   formName: string;
@@ -17,16 +18,20 @@ interface FormNavbarProps {
   onPublish: () => void;
   onDesignClick: () => void;
   onSettingClick: () => void;
+  isPublished: boolean;
+  uuid:string
 }
 
 export const FormNavbar = ({
-
+  isPublished,
   onPublish,
   onDesignClick,
   onSettingClick,
+  uuid
 }: FormNavbarProps) => {
   const router = useRouter();
-  const {loading} = useUUIDClient()
+  const { loading } = useUUIDClient()
+  const [isShareDialogOpen,setShareDialogOpen] = useState<boolean>(false)
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background">
@@ -37,19 +42,24 @@ export const FormNavbar = ({
           <ChevronRight className="hidden sm:block h-4 w-4 text-muted-foreground" />
           <span
             className="border-0 bg-transparent p-0 text-sm font-semibold focus-visible:ring-0 truncate"
-            
+
           >Create New Form</span>
           {loading && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          Saving...
-        </div>
-      )}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Saving...
+            </div>
+          )}
         </div>
         <div className="flex gap-2 items-center">
-          <Button className="cursor-pointer bg-green-800" onClick={onPublish}>
+          {isPublished === true ? (<Button className="cursor-pointer bg-green-800" onClick={() => setShareDialogOpen(!isShareDialogOpen)}>
+            Published
+          </Button>) : (<Button className="cursor-pointer bg-green-800" onClick={onPublish}>
             Publish
-          </Button>
+          </Button>)}
+          {/* <Button className="cursor-pointer bg-green-800" onClick={onPublish}>
+            Publish
+          </Button> */}
           <Settings2Icon
             onClick={onSettingClick}
             className="cursor-pointer"
@@ -64,6 +74,12 @@ export const FormNavbar = ({
             onClick={onDesignClick}
             className="cursor-pointer"
             size={20}
+          />
+
+          <ShareDialog
+            isDialogOpen={isShareDialogOpen}
+            setDialogOpen={setShareDialogOpen}
+            uuid={uuid}
           />
         </div>
       </header>

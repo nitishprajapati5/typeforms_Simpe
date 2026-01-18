@@ -14,6 +14,7 @@ import {
   Question,
 } from '../types';
 import prisma from '@/app/_DatabaseConfiguration/dbConfig';
+import { revalidatePath } from 'next/cache';
 
 export async function initialValuePushToDatabase(
   uuid: string,
@@ -824,6 +825,8 @@ export async function PublishFormToServer(
       }
     });
 
+    revalidatePath(`/form/build/${res.workspaceId}/${uuid}`)
+
     return {
       success: true,
       message: 'Form published successfully',
@@ -835,4 +838,46 @@ export async function PublishFormToServer(
       message: 'Failed to save form configuration',
     };
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function RevertFormPublishActionToServer(prevState:any,formData:FormData):Promise<ActionResponse>{
+
+  try {
+    const uuid = formData.get("uuid") as string
+
+   const user = await getSession();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  const res = await prisma.formData.findUnique({
+    where: { formId: uuid },
+  });
+
+  if (!res) {
+    redirect('/login');
+  }
+
+  console.log("res",res)
+
+  await prisma.formSettingConfiguration.update({
+    where:{formId:res.id},
+    data:{
+      isPublished:false
+    }
+  })
+  revalidatePath(`/form/build/${res.workspaceId}/${uuid}`)
+
+  return {success:true,message:"Unpublished the Link Successfully."}
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error:unknown) {
+    return {
+      success:false,
+      message:"Something went wrong",
+    }
+  }
+
 }
