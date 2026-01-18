@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import { Eye, CheckCircle } from 'lucide-react';
+import { Eye, CheckCircle, Info } from 'lucide-react';
 import { useState } from 'react';
 import {
   FormResponseFromDatabase,
   JsonValue,
+  QuestionConfig,
 } from '@/app/form/build/[id]/[uuid]/types';
 
 interface ColorConfig {
@@ -32,7 +33,9 @@ interface PreviewClientProps {
 }
 
 export default function PreviewClient({ data }: PreviewClientProps) {
-  const [formValues, setFormValues] = useState<Record<string, string>>({});
+  const [formValues, setFormValues] = useState<
+    Record<string, string | string[]>
+  >({});
 
   console.log(data);
 
@@ -74,120 +77,170 @@ export default function PreviewClient({ data }: PreviewClientProps) {
   };
 
   const renderQuestion = (question: Question) => {
-    //const questionDesign = getQuestionDesign();
-    // const questionStyle = {
-    //   fontFamily: questionDesign.fontSelected || "sans-serif",
-    // };
+    const questionType = question.type;
+    const options = question.options as QuestionConfig;
 
-    const questionType = question.type.toLowerCase().replace(/\s+/g, '');
-    const options = question.options as any;
-
-    switch (questionType) {
-      case 'textfield':
-        return (
-          <input
-            type={options?.type || 'text'}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            placeholder={options?.placeholder || 'Your answer'}
-            value={formValues[question.id] || ''}
-            onChange={(e) =>
-              setFormValues({ ...formValues, [question.id]: e.target.value })
-            }
-          />
-        );
-
-      case 'textarea':
-        return (
-          <textarea
-            rows={4}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            placeholder={options?.placeholder || 'Your answer'}
-            value={formValues[question.id] || ''}
-            onChange={(e) =>
-              setFormValues({ ...formValues, [question.id]: e.target.value })
-            }
-          />
-        );
-
-      case 'dropdown':
-        const dropdownOptions = options?.options || [];
-        return (
-          <select
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            value={formValues[question.id] || ''}
-            onChange={(e) =>
-              setFormValues({ ...formValues, [question.id]: e.target.value })
-            }
-          >
-            <option value="">Choose an option</option>
-            {dropdownOptions.map((option: string, idx: number) => (
-              <option key={idx} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        );
-
-      case 'radio':
-        const radioOptions = (
-          Array.isArray(question.options) ? question.options : []
-        ) as string[];
-        return (
-          <div className="space-y-2">
-            {radioOptions.map((option: string, idx: number) => (
-              <label
-                key={idx}
-                className="flex items-center gap-3 cursor-pointer"
-              >
-                <input
-                  type="radio"
-                  name={question.id}
-                  value={option}
-                  checked={formValues[question.id] === option}
-                  onChange={(e) =>
-                    setFormValues({
-                      ...formValues,
-                      [question.id]: e.target.value,
-                    })
-                  }
-                  className="h-4 w-4 text-blue-600"
-                />
-                <span className="text-gray-700">{option}</span>
-              </label>
-            ))}
-          </div>
-        );
-
-      case 'checkbox':
-        const checkboxOptions = (
-          Array.isArray(question.options) ? question.options : []
-        ) as string[];
-        return (
-          <div className="space-y-2">
-            {checkboxOptions.map((option: string, idx: number) => (
-              <label
-                key={idx}
-                className="flex items-center gap-3 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 rounded text-blue-600"
-                />
-                <span className="text-gray-700">{option}</span>
-              </label>
-            ))}
-          </div>
-        );
-
-      default:
-        return (
-          <input
-            type="text"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            placeholder="Your answer"
-          />
-        );
+    // Text-based input fields
+    if (
+      ['Text Field', 'Email Field', 'Number Field', 'URL Field'].includes(
+        questionType
+      )
+    ) {
+      return (
+        <input
+          type={options?.type || questionType.toLowerCase().split(' ')[0]}
+          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          placeholder={options?.placeholder || 'Your answer'}
+          value={formValues[question.id] || ''}
+          onChange={(e) =>
+            setFormValues({ ...formValues, [question.id]: e.target.value })
+          }
+        />
+      );
     }
+
+    // Multi-line text area
+    if (questionType === 'Multi Line/Text Area') {
+      return (
+        <textarea
+          rows={options?.rows || 4}
+          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          placeholder={options?.placeholder || 'Your answer'}
+          value={formValues[question.id] || ''}
+          onChange={(e) =>
+            setFormValues({ ...formValues, [question.id]: e.target.value })
+          }
+        />
+      );
+    }
+
+    // Date and datetime inputs
+    if (
+      questionType === 'Date Picker' ||
+      questionType === 'Date and Time Picker'
+    ) {
+      return (
+        <input
+          type={options?.type || questionType}
+          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          value={formValues[question.id] || ''}
+          onChange={(e) =>
+            setFormValues({ ...formValues, [question.id]: e.target.value })
+          }
+        />
+      );
+    }
+
+    // File upload
+    if (questionType === 'File Upload' || questionType === 'Image Upload') {
+      return (
+        <input
+          type="file"
+          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          accept={options?.accept}
+          onChange={(e) =>
+            setFormValues({ ...formValues, [question.id]: e.target.value })
+          }
+        />
+      );
+    }
+
+    // Dropdown select
+    if (questionType === 'Drop Down') {
+      const dropdownOptions = options?.options || [];
+      return (
+        <select
+          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          value={formValues[question.id] || ''}
+          onChange={(e) =>
+            setFormValues({ ...formValues, [question.id]: e.target.value })
+          }
+        >
+          <option value="">Choose an option</option>
+          {dropdownOptions.map((option: string, idx: number) => (
+            <option key={idx} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    // Radio buttons
+    if (questionType === 'Radio Buttons') {
+      const radioOptions = (
+        Array.isArray(question.options) ? question.options : []
+      ) as string[];
+      return (
+        <div className="space-y-2">
+          {radioOptions.map((option: string, idx: number) => (
+            <label key={idx} className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="radio"
+                name={question.id}
+                value={option}
+                checked={formValues[question.id] === option}
+                onChange={(e) =>
+                  setFormValues({
+                    ...formValues,
+                    [question.id]: e.target.value,
+                  })
+                }
+                className="h-4 w-4 text-blue-600"
+              />
+              <span className="text-gray-700">{option}</span>
+            </label>
+          ))}
+        </div>
+      );
+    }
+
+    // Checkboxes
+    if (questionType === 'Check Boxes') {
+      const checkboxOptions = (
+        Array.isArray(question.options) ? question.options : []
+      ) as string[];
+      const currentValues = (
+        Array.isArray(formValues[question.id]) ? formValues[question.id] : []
+      ) as string[];
+
+      return (
+        <div className="space-y-2">
+          {checkboxOptions.map((option: string, idx: number) => (
+            <label key={idx} className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={currentValues.includes(option)}
+                onChange={(e) => {
+                  const newValues = e.target.checked
+                    ? [...currentValues, option]
+                    : currentValues.filter((v: string) => v !== option);
+                  setFormValues({
+                    ...formValues,
+                    [question.id]: newValues,
+                  });
+                }}
+                className="h-4 w-4 rounded text-blue-600"
+              />
+              <span className="text-gray-700">{option}</span>
+            </label>
+          ))}
+        </div>
+      );
+    }
+
+    // Default fallback
+    return (
+      <input
+        type="text"
+        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+        placeholder="Your answer"
+        value={formValues[question.id] || ''}
+        onChange={(e) =>
+          setFormValues({ ...formValues, [question.id]: e.target.value })
+        }
+      />
+    );
   };
 
   return (
@@ -195,8 +248,9 @@ export default function PreviewClient({ data }: PreviewClientProps) {
       {/* Preview Header */}
       <div className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
+          <div className="flex  items-center gap-2">
             <Eye className="h-4 w-4 text-blue-600" />
+
             <span className="text-sm font-medium text-blue-600">
               Preview Mode
             </span>
@@ -211,10 +265,15 @@ export default function PreviewClient({ data }: PreviewClientProps) {
         </div>
       </div>
 
-      {/* Form Content */}
+      {data.formSettings?.isPublished ? (
+        <div className="p-2 bg-amber-300 flex items-center justify-center gap-x-2">
+          <Info size={16} /> This form is already published your changes will
+          reflect the form changes
+        </div>
+      ) : null}
+
       <main className="mx-auto max-w-3xl px-4 py-8">
         <div className="rounded-2xl bg-white shadow-md overflow-hidden">
-          {/* Form Header with colored top border */}
           {data.formDesign && (
             <div
               className="h-2"
@@ -225,7 +284,6 @@ export default function PreviewClient({ data }: PreviewClientProps) {
           )}
 
           <div className="p-8">
-            {/* Title and Description */}
             <div className="mb-8">
               <h1
                 className={`text-3xl mb-3 ${getTitleStyle()}`}
@@ -249,7 +307,6 @@ export default function PreviewClient({ data }: PreviewClientProps) {
               </p>
             </div>
 
-            {/* Questions */}
             <div className="space-y-6">
               {data.questions.map((question, index) => (
                 <div
@@ -275,7 +332,6 @@ export default function PreviewClient({ data }: PreviewClientProps) {
               ))}
             </div>
 
-            {/* Submit Button */}
             <div className="mt-8 flex justify-start">
               <button
                 className="rounded-lg px-8 py-3 font-medium text-white transition-colors hover:opacity-90"

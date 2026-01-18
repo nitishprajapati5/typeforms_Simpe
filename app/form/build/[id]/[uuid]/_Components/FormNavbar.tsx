@@ -6,6 +6,7 @@ import {
   EyeIcon,
   PencilIcon,
   Loader2,
+  Info,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useUUIDClient } from "../_Context/UUIDClientProvider";
@@ -19,7 +20,7 @@ interface FormNavbarProps {
   onDesignClick: () => void;
   onSettingClick: () => void;
   isPublished: boolean;
-  uuid:string
+  uuid: string
 }
 
 export const FormNavbar = ({
@@ -31,10 +32,15 @@ export const FormNavbar = ({
 }: FormNavbarProps) => {
   const router = useRouter();
   const { loading } = useUUIDClient()
-  const [isShareDialogOpen,setShareDialogOpen] = useState<boolean>(false)
+  const [isShareDialogOpen, setShareDialogOpen] = useState<boolean>(false)
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background">
+      {isPublished ? (
+        <div className="p-4 bg-amber-300 flex items-center justify-center gap-x-2">
+          <Info size={16} /> {" "} This form is already published your changes will reflect the form changes
+        </div>
+      ) : null}
       <header className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3 min-w-0">
           <FormInput className="h-5 w-5 shrink-0" />
@@ -57,7 +63,7 @@ export const FormNavbar = ({
           </Button>) : (<Button className="cursor-pointer bg-green-800" onClick={onPublish}>
             Publish
           </Button>)}
-         
+
           <Settings2Icon
             onClick={onSettingClick}
             className="cursor-pointer"
