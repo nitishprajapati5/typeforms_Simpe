@@ -44,6 +44,7 @@ export const mapSettingConfigurationToPayload = (config:FormSettingsConfiguratio
 })
 
 export const mapQuestionToPayload = (config:Omit<Question, 'id'>):Omit<Question, 'id'> => ({
+  uuid:config.uuid,
   title: config.title,
   type: config.type,
   config: config.config,
