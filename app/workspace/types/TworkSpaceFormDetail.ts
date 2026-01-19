@@ -9,4 +9,7 @@ export type TworkSpaceFormDetail = {
     formTitle: string | null;
     id: string;
   } | null;
+  formSettings: {
+    isPublished: boolean;
+  } | null;
 };

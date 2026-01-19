@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Edit2, Trash2 } from 'lucide-react';
 import { TworkSpaceFormDetails } from '../../types/TworkSpaceFormDetail';
 import { ServerPagination } from './ServerPagination';
+import { Badge } from '@/components/ui/badge';
 
 type Props = {
   forms: TworkSpaceFormDetails;
@@ -54,7 +55,16 @@ export const WorkSpaceFormsTable = ({
 
             return (
               <tr key={form.id} className="hover:bg-muted/30 transition-colors">
-                <td className="px-6 py-4 font-medium">{title}</td>
+                <td className="px-6 py-4 font-medium">
+                  {title}{' '}
+                  <span>
+                    {form.formSettings?.isPublished === true ? (
+                      <Badge className="bg-green-500">Published</Badge>
+                    ) : (
+                      <Badge className="bg-gray-500">Not Published</Badge>
+                    )}
+                  </span>
+                </td>
 
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-4">

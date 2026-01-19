@@ -6,17 +6,14 @@ import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useActionState } from 'react';
 import { magicLink } from '../_ServerActions/actions';
-import { useFormStatus } from 'react-dom';
 import { toast } from 'sonner';
 
 export default function MagicLink() {
   const router = useRouter();
-  const [state, formAction] = useActionState(magicLink, {
+  const [state, formAction, pending] = useActionState(magicLink, {
     success: false,
     message: '',
   });
-
-  const { pending } = useFormStatus();
 
   if (state.success) {
     toast.success('Magic link send! Check your email.');

@@ -6,17 +6,14 @@ import Image from 'next/image';
 import { login } from '../_ServerActions/actions';
 import { useRouter } from 'next/navigation';
 import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
 import { Loader2 } from 'lucide-react';
 
 export default function Login() {
   const router = useRouter();
-  const [state, formAction] = useActionState(login, {
+  const [state, formAction, pending] = useActionState(login, {
     success: false,
     message: '',
   });
-
-  const { pending } = useFormStatus();
 
   return (
     <form action={formAction} className="w-1/2 justify-center items-center">
@@ -56,7 +53,7 @@ export default function Login() {
             Login
           </Button>
         ) : (
-          <Loader2 className="animate-spin" />
+          <Loader2 className="animate-spin w-full items-center" />
         )}
 
         <Button type="button" className="flex gap-2">

@@ -76,8 +76,9 @@ export const FormNavbar = ({
           />
           <PencilIcon
             onClick={onDesignClick}
-            className="cursor-pointer"
+            className="cursor-pointer hidden"
             size={20}
+            
           />
 
           <ShareDialog

@@ -6,16 +6,14 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useActionState } from 'react';
 import { signup } from '../_ServerActions/actions';
-import { useFormStatus } from 'react-dom';
 import { Loader2 } from 'lucide-react';
 
 export default function Signup() {
   const router = useRouter();
-  const [state, formAction] = useActionState(signup, {
+  const [state, formAction, pending] = useActionState(signup, {
     success: false,
     message: '',
   });
-  const { pending } = useFormStatus();
 
   return (
     <form action={formAction} className="flex w-full justify-center">
@@ -47,10 +45,10 @@ export default function Signup() {
         )}
         {!pending ? (
           <Button type="submit" className="mt-4">
-            Sign Up
+            Login
           </Button>
         ) : (
-          <Loader2 className="animate-spin" />
+          <Loader2 className="animate-spin w-full items-center" />
         )}
         <Button className="cursor-pointer">
           <Image
