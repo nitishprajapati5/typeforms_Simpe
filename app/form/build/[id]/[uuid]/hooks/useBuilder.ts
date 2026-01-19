@@ -56,6 +56,7 @@ export const useFormBuilder = ({ initialData }: UseFormBuilderProps) => {
     return initialData.questions.map(q => ({
       id: q.id,
       title: q.title ?? '',
+      uuid:q.uuid,
       type: q.type,
       config: q.options as QuestionConfig ?? {},
       required: q.required
@@ -359,6 +360,7 @@ const addQuestion = async () => {
 
     const questionData: Omit<Question, 'id'> = {
       title: newQuestionTitle,
+      uuid:"",
       type: selectedTypeOfQuestion,
       config: questionConfigMap[selectedTypeOfQuestion] || {},
       required: false,
@@ -473,6 +475,7 @@ const updateQuestionTitle = (id: string, title: string) => {
       type: questionToDuplicate.type,
       config: { ...questionToDuplicate.config },
       required: questionToDuplicate.required,
+      uuid:""
     };
 
     startTransition(async () => {

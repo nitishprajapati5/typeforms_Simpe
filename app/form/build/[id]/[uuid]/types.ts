@@ -119,6 +119,7 @@ export interface QuestionConfig {
 
 export interface Question {
   id: string;
+  uuid:string;
   title: string;
   type: string;
   config: QuestionConfig;

@@ -442,7 +442,8 @@ export async function createQuestionInDatabase(
     });
 
     const question: Question = {
-      id: created.uuid,
+      id: created.id,
+      uuid:created.uuid,
       title: created.title!,
       type: created.type,
       required: created.required,
@@ -502,6 +503,7 @@ export async function ChangesRequiredState(
 
     const question: Question = {
       id: updated.id,
+      uuid:updated.uuid,
       title: updated.title!,
       type: updated.type,
       required: updated.required,
@@ -583,6 +585,7 @@ export async function updateQuestionOptionsInDatabase(
     const question: Question = {
       id: updated.id,
       title: updated.title!,
+      uuid:updated.uuid,
       type: updated.type,
       required: updated.required,
       config: updated.options as Question['config'],
@@ -644,6 +647,7 @@ export async function updateQuestionTitleInDatabase(
     const question: Question = {
       id: updated.id,
       title: updated.title!,
+      uuid:updated.uuid,
       type: updated.type,
       required: updated.required,
       config: updated.options as Question['config'],
