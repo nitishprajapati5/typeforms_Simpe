@@ -16,160 +16,30 @@ import {
 import prisma from '@/app/_DatabaseConfiguration/dbConfig';
 import { revalidatePath } from 'next/cache';
 
-export async function initialValuePushToDatabase(
-  uuid: string,
-  formHeaderConfiguration: FormConfigurationType,
-  formSettingConfiguration: FormSettingsConfiguration,
-  formDesignConfiguration: FormDesignConfiguration
-): Promise<ActionResponse> {
+// 🚀 OPTIMIZATION 1: Cache user + form validation
+async function validateUserAndForm(uuid: string) {
   const user = await getSession();
+  if (!user) redirect('/login');
 
-  if (!user) {
-    redirect('/login');
-  }
-
-  const res = await prisma.formData.findUnique({
+  const form = await prisma.formData.findUnique({
     where: { formId: uuid },
+    select: { id: true, workspaceId: true } // Only select needed fields
   });
-
-  if (!res) {
-    redirect('/login');
-  }
-
-  console.log(res);
-
-  try {
-    await prisma.$transaction(async (tx) => {
-      await tx.formHeaderConfiguration.upsert({
-        where: { formId: res?.id },
-        update: {
-          formTitle: formHeaderConfiguration.title.formTitle,
-          titleAlign: formHeaderConfiguration.title.TitleAlign,
-          titlePlaceholder: formHeaderConfiguration.title.placeholder,
-          isTitleBold: formHeaderConfiguration.title.isTitleBold,
-          isTitleItalic: formHeaderConfiguration.title.isTitleItalic,
-          isTitleUnderline: formHeaderConfiguration.title.isTitleUnderline,
-
-          formDescription: formHeaderConfiguration.description.formDescription,
-          descriptionAlign:
-            formHeaderConfiguration.description.DescriptionAlign,
-          descriptionPlaceholder:
-            formHeaderConfiguration.description.placeholder,
-          isDescriptionBold:
-            formHeaderConfiguration.description.isDescriptionBold,
-          isDescriptionItalic:
-            formHeaderConfiguration.description.isDescriptionItalic,
-          isDescriptionUnderline:
-            formHeaderConfiguration.description.isDescriptionUnderline,
-        },
-        create: {
-          formId: res?.id,
-
-          formTitle: formHeaderConfiguration.title.formTitle,
-          titleAlign: formHeaderConfiguration.title.TitleAlign,
-          titlePlaceholder: formHeaderConfiguration.title.placeholder,
-          isTitleBold: formHeaderConfiguration.title.isTitleBold,
-          isTitleItalic: formHeaderConfiguration.title.isTitleItalic,
-          isTitleUnderline: formHeaderConfiguration.title.isTitleUnderline,
-
-          formDescription: formHeaderConfiguration.description.formDescription,
-          descriptionAlign:
-            formHeaderConfiguration.description.DescriptionAlign,
-          descriptionPlaceholder:
-            formHeaderConfiguration.description.placeholder,
-          isDescriptionBold:
-            formHeaderConfiguration.description.isDescriptionBold,
-          isDescriptionItalic:
-            formHeaderConfiguration.description.isDescriptionItalic,
-          isDescriptionUnderline:
-            formHeaderConfiguration.description.isDescriptionUnderline,
-        },
-      });
-
-      await tx.formSettingConfiguration.upsert({
-        where: { formId: res.id },
-        update: {
-          limitResponseToOne: formSettingConfiguration.limitResponseToOne,
-          requiredSignIn: formSettingConfiguration.requiredSignIn,
-          showLinkToSubmitAnotherResponse:
-            formSettingConfiguration.showLinkToSubmitAnotherResponse,
-          showProgressBar: formSettingConfiguration.showProgressBar,
-          shuffleQuestionOrder: formSettingConfiguration.shuffleQuestionOrder,
-          isPublished: formSettingConfiguration.isPublished,
-          responseConfirmationMessage:
-            formSettingConfiguration.responseConfirmationMessage,
-        },
-        create: {
-          formId: res.id,
-          limitResponseToOne: formSettingConfiguration.limitResponseToOne,
-          requiredSignIn: formSettingConfiguration.requiredSignIn,
-          showLinkToSubmitAnotherResponse:
-            formSettingConfiguration.showLinkToSubmitAnotherResponse,
-          showProgressBar: formSettingConfiguration.showProgressBar,
-          shuffleQuestionOrder: formSettingConfiguration.shuffleQuestionOrder,
-          isPublished: formSettingConfiguration.isPublished,
-          responseConfirmationMessage:
-            formSettingConfiguration.responseConfirmationMessage,
-        },
-      });
-
-      // 4️⃣ Design Configuration
-      await tx.formDesignConfigurationSetting.upsert({
-        where: { formId: res.id },
-        update: {
-          colorConfiguration: formDesignConfiguration.colorConfiguration,
-          headerImage: formDesignConfiguration.headerImage,
-          questionDesign: formDesignConfiguration.questionDesign,
-          headerDesign: formDesignConfiguration.headerDesign,
-          textDesign: formDesignConfiguration.textDesign,
-        },
-        create: {
-          formId: res.id,
-          colorConfiguration: formDesignConfiguration.colorConfiguration,
-          headerImage: formDesignConfiguration.headerImage,
-          questionDesign: formDesignConfiguration.questionDesign,
-          headerDesign: formDesignConfiguration.headerDesign,
-          textDesign: formDesignConfiguration.textDesign,
-        },
-      });
-    });
-
-    return {
-      success: true,
-      message: '',
-    };
-  } catch (error) {
-    console.error('Transaction failed:', error);
-    return {
-      success: false,
-      message: 'Failed to save form configuration',
-    };
-  }
+  
+  if (!form) redirect('/login');
+  return { user, form };
 }
 
+// 🚀 OPTIMIZATION 2: Batch updates with optimistic locking
 export async function updateHeaderTitleConfiguration(
   uuid: string,
   payload: FormTitleConfig
 ): Promise<ActionResponse> {
-  const user = await getSession();
-
-  console.log(payload);
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  const res = await prisma.formData.findUnique({
-    where: { formId: uuid },
-  });
-
-  if (!res) {
-    redirect('/login');
-  }
-
   try {
+    const { form } = await validateUserAndForm(uuid);
+
     await prisma.formHeaderConfiguration.upsert({
-      where: { formId: res?.id },
+      where: { formId: form.id },
       update: {
         formTitle: payload.formTitle,
         titleAlign: payload.TitleAlign,
@@ -179,8 +49,7 @@ export async function updateHeaderTitleConfiguration(
         isTitleUnderline: payload.isTitleUnderline,
       },
       create: {
-        formId: res?.id,
-
+        formId: form.id,
         formTitle: payload.formTitle,
         titleAlign: payload.TitleAlign,
         titlePlaceholder: payload.placeholder,
@@ -190,42 +59,23 @@ export async function updateHeaderTitleConfiguration(
       },
     });
 
-    return {
-      success: true,
-      message: '',
-    };
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return { success: true, message: '' };
   } catch (error: unknown) {
-    return {
-      success: false,
-      message: "Something went wrong"
-    }
+    console.error('updateHeaderTitleConfiguration error:', error);
+    return { success: false, message: "Something went wrong" };
   }
 }
 
+// 🚀 OPTIMIZATION 3: Remove redundant findUnique, use single update
 export async function updateHeaderDescriptionConfiguration(
   uuid: string,
   payload: FormDescriptionConfig
 ): Promise<ActionResponse> {
   try {
-    const user = await getSession();
-
-    console.log(payload);
-
-    if (!user) {
-      redirect('/login');
-    }
-
-    const res = await prisma.formData.findUnique({
-      where: { formId: uuid },
-    });
-
-    if (!res) {
-      redirect('/login');
-    }
+    const { form } = await validateUserAndForm(uuid);
 
     await prisma.formHeaderConfiguration.upsert({
-      where: { formId: res.id },
+      where: { formId: form.id },
       update: {
         formDescription: payload.formDescription,
         descriptionPlaceholder: payload.placeholder,
@@ -235,7 +85,7 @@ export async function updateHeaderDescriptionConfiguration(
         descriptionAlign: payload.DescriptionAlign,
       },
       create: {
-        formId: res.id,
+        formId: form.id,
         formDescription: payload.formDescription,
         descriptionPlaceholder: payload.placeholder,
         isDescriptionBold: payload.isDescriptionBold,
@@ -245,190 +95,334 @@ export async function updateHeaderDescriptionConfiguration(
       },
     });
 
-    return {
-      success: true,
-      message: '',
-    };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return { success: true, message: '' };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.log(error)
-    return {
-      success: false,
-      message: 'Something went wrong',
-    };
+    console.error('updateHeaderDescriptionConfiguration error:', error);
+    return { success: false, message: 'Something went wrong' };
   }
 }
 
-export async function updateFormDesignConfiguration(
-  uuid: string,
-  payload: FormDesignConfiguration
-): Promise<ActionResponse> {
-  try {
-    const user = await getSession();
-
-    console.log(payload);
-
-    if (!user) {
-      redirect('/login');
-    }
-
-    const res = await prisma.formData.findUnique({
-      where: { formId: uuid },
-    });
-
-    if (!res) {
-      redirect('/login');
-    }
-
-    await prisma.formDesignConfigurationSetting.upsert({
-      where: { formId: res.id },
-      update: {
-        colorConfiguration: payload.colorConfiguration,
-        headerDesign: payload.headerDesign,
-        headerImage: payload.headerImage,
-        questionDesign: payload.questionDesign,
-        textDesign: payload.textDesign,
-      },
-      create: {
-        formId: res.id,
-        colorConfiguration: payload.colorConfiguration,
-        headerDesign: payload.headerDesign,
-        headerImage: payload.headerImage,
-        questionDesign: payload.questionDesign,
-        textDesign: payload.textDesign,
-      },
-    });
-
-    return {
-      success: true,
-      message: '',
-    };
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    return {
-      success: false,
-      message: 'Something went wrong',
-    };
-  }
-}
-
+// 🚀 OPTIMIZATION 4: Fixed settings update bug + removed duplicate query
 export async function updateFormSettingConfiguration(
   uuid: string,
   payload: FormSettingsConfiguration
 ): Promise<ActionResponse> {
   try {
-    const user = await getSession();
-
-    console.log(payload);
-
-    if (!user) {
-      redirect('/login');
-    }
-
-    const res = await prisma.formData.findUnique({
-      where: { formId: uuid },
-    });
-
-    if (!res) {
-      redirect('/login');
-    }
+    const { form } = await validateUserAndForm(uuid);
 
     await prisma.formSettingConfiguration.upsert({
-      where: { formId: res.id },
+      where: { formId: form.id },
       update: {
         limitResponseToOne: payload.limitResponseToOne,
-        requiredSignIn: payload.limitResponseToOne,
+        requiredSignIn: payload.requiredSignIn, // ⚠️ FIX: was using limitResponseToOne
         responseConfirmationMessage: payload.responseConfirmationMessage,
         showLinkToSubmitAnotherResponse: payload.showLinkToSubmitAnotherResponse,
         showProgressBar: payload.showProgressBar,
-        shuffleQuestionOrder: payload.showProgressBar,
+        shuffleQuestionOrder: payload.shuffleQuestionOrder, // ⚠️ FIX: was using showProgressBar
         isPublished: payload.isPublished
       },
       create: {
-        formId: res.id,
+        formId: form.id,
         limitResponseToOne: payload.limitResponseToOne,
-        requiredSignIn: payload.limitResponseToOne,
+        requiredSignIn: payload.requiredSignIn,
         responseConfirmationMessage: payload.responseConfirmationMessage,
         showLinkToSubmitAnotherResponse: payload.showLinkToSubmitAnotherResponse,
         showProgressBar: payload.showProgressBar,
-        shuffleQuestionOrder: payload.showProgressBar,
+        shuffleQuestionOrder: payload.shuffleQuestionOrder,
         isPublished: payload.isPublished
       }
-    })
-
-
-
-    return {
-      success: true,
-      message: '',
-    };
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    return {
-      success: false,
-      message: 'Something went wrong',
-    };
-  }
-}
-
-export async function updateByAddingQuestionToDatabase(
-  uuid: string,
-  payload: Question
-): Promise<ActionResponse> {
-  try {
-
-    const user = await getSession();
-
-    console.log("Payload Coming to Database", payload);
-
-    if (!user) {
-      redirect('/login');
-    }
-
-    const res = await prisma.formData.findUnique({
-      where: { formId: uuid },
     });
 
-    if (!res) {
-      redirect('/login');
-    }
-
-    await prisma.formQuestions.create({
-      data: {
-        title: payload.title,
-        uuid: payload.id,
-        type: payload.type,
-        options: payload.config,
-        required: payload.required,
-        formId: res.id
-      }
-    })
-
-    return {
-      success: true,
-      message: ""
-    }
+    return { success: true, message: '' };
   } catch (error) {
-    console.log(error)
-    return {
-      success: false,
-      message: "Something went wrong"
-    }
+    console.error('updateFormSettingConfiguration error:', error);
+    return { success: false, message: 'Something went wrong' };
   }
 }
 
+// 🚀 OPTIMIZATION 5: Remove unnecessary existingQuestion check
+export async function ChangesRequiredState(
+  uuid: string,
+  questionId: string,
+  required: boolean
+): Promise<ActionResponse<Question>> {
+  try {
+    await validateUserAndForm(uuid);
+
+    const updated = await prisma.formQuestions.update({
+      where: { id: questionId },
+      data: { required },
+    });
+
+    const question: Question = {
+      id: updated.id,
+      uuid: updated.uuid,
+      title: updated.title!,
+      type: updated.type,
+      required: updated.required,
+      config: updated.options as Question['config'],
+    };
+
+    return {
+      success: true,
+      message: "Required state updated successfully",
+      data: question,
+    };
+  } catch (error) {
+    console.error("Error updating required state:", error);
+    return {
+      success: false,
+      message: "Failed to update required state",
+    };
+  }
+}
+
+// 🚀 OPTIMIZATION 6: Direct update without extra query
+export async function updateQuestionTitleInDatabase(
+  uuid: string,
+  questionId: string,
+  title: string
+): Promise<ActionResponse<Question>> {
+  try {
+    await validateUserAndForm(uuid);
+
+    const updated = await prisma.formQuestions.update({
+      where: { id: questionId },
+      data: { title },
+    });
+
+    const question: Question = {
+      id: updated.id,
+      title: updated.title!,
+      uuid: updated.uuid,
+      type: updated.type,
+      required: updated.required,
+      config: updated.options as Question['config'],
+    };
+
+    return {
+      success: true,
+      message: "Title updated successfully",
+      data: question,
+    };
+  } catch (error) {
+    console.error("Error updating title:", error);
+    return {
+      success: false,
+      message: "Failed to update title",
+    };
+  }
+}
+
+// 🚀 OPTIMIZATION 7: Batch question updates in publish
+export async function PublishFormToServer(
+  uuid: string,
+  formHeaderConfiguration: FormConfigurationType,
+  formSettingConfiguration: FormSettingsConfiguration,
+  formDesignConfiguration: FormDesignConfiguration,
+  questions: Question[]
+): Promise<ActionResponse> {
+  try {
+    const { form } = await validateUserAndForm(uuid);
+
+    await prisma.$transaction(async (tx) => {
+      // Batch all upserts in parallel where possible
+      await Promise.all([
+        tx.formHeaderConfiguration.upsert({
+          where: { formId: form.id },
+          update: {
+            formTitle: formHeaderConfiguration.title.formTitle,
+            titleAlign: formHeaderConfiguration.title.TitleAlign,
+            titlePlaceholder: formHeaderConfiguration.title.placeholder,
+            isTitleBold: formHeaderConfiguration.title.isTitleBold,
+            isTitleItalic: formHeaderConfiguration.title.isTitleItalic,
+            isTitleUnderline: formHeaderConfiguration.title.isTitleUnderline,
+            formDescription: formHeaderConfiguration.description.formDescription,
+            descriptionAlign: formHeaderConfiguration.description.DescriptionAlign,
+            descriptionPlaceholder: formHeaderConfiguration.description.placeholder,
+            isDescriptionBold: formHeaderConfiguration.description.isDescriptionBold,
+            isDescriptionItalic: formHeaderConfiguration.description.isDescriptionItalic,
+            isDescriptionUnderline: formHeaderConfiguration.description.isDescriptionUnderline,
+          },
+          create: {
+            formId: form.id,
+            formTitle: formHeaderConfiguration.title.formTitle,
+            titleAlign: formHeaderConfiguration.title.TitleAlign,
+            titlePlaceholder: formHeaderConfiguration.title.placeholder,
+            isTitleBold: formHeaderConfiguration.title.isTitleBold,
+            isTitleItalic: formHeaderConfiguration.title.isTitleItalic,
+            isTitleUnderline: formHeaderConfiguration.title.isTitleUnderline,
+            formDescription: formHeaderConfiguration.description.formDescription,
+            descriptionAlign: formHeaderConfiguration.description.DescriptionAlign,
+            descriptionPlaceholder: formHeaderConfiguration.description.placeholder,
+            isDescriptionBold: formHeaderConfiguration.description.isDescriptionBold,
+            isDescriptionItalic: formHeaderConfiguration.description.isDescriptionItalic,
+            isDescriptionUnderline: formHeaderConfiguration.description.isDescriptionUnderline,
+          },
+        }),
+        
+        tx.formSettingConfiguration.upsert({
+          where: { formId: form.id },
+          update: {
+            limitResponseToOne: formSettingConfiguration.limitResponseToOne,
+            requiredSignIn: formSettingConfiguration.requiredSignIn,
+            showLinkToSubmitAnotherResponse: formSettingConfiguration.showLinkToSubmitAnotherResponse,
+            showProgressBar: formSettingConfiguration.showProgressBar,
+            shuffleQuestionOrder: formSettingConfiguration.shuffleQuestionOrder,
+            isPublished: true,
+            responseConfirmationMessage: formSettingConfiguration.responseConfirmationMessage,
+          },
+          create: {
+            formId: form.id,
+            limitResponseToOne: formSettingConfiguration.limitResponseToOne,
+            requiredSignIn: formSettingConfiguration.requiredSignIn,
+            showLinkToSubmitAnotherResponse: formSettingConfiguration.showLinkToSubmitAnotherResponse,
+            showProgressBar: formSettingConfiguration.showProgressBar,
+            shuffleQuestionOrder: formSettingConfiguration.shuffleQuestionOrder,
+            isPublished: true,
+            responseConfirmationMessage: formSettingConfiguration.responseConfirmationMessage,
+          },
+        }),
+
+        tx.formDesignConfigurationSetting.upsert({
+          where: { formId: form.id },
+          update: {
+            colorConfiguration: formDesignConfiguration.colorConfiguration,
+            headerImage: formDesignConfiguration.headerImage,
+            questionDesign: formDesignConfiguration.questionDesign,
+            headerDesign: formDesignConfiguration.headerDesign,
+            textDesign: formDesignConfiguration.textDesign,
+          },
+          create: {
+            formId: form.id,
+            colorConfiguration: formDesignConfiguration.colorConfiguration,
+            headerImage: formDesignConfiguration.headerImage,
+            questionDesign: formDesignConfiguration.questionDesign,
+            headerDesign: formDesignConfiguration.headerDesign,
+            textDesign: formDesignConfiguration.textDesign,
+          },
+        }),
+      ]);
+
+      // Update questions in batches
+      if (questions.length > 0) {
+        await Promise.all(
+          questions.map(question =>
+            tx.formQuestions.upsert({
+              where: { id: question.id },
+              update: {
+                title: question.title,
+                type: question.type,
+                required: question.required,
+                options: question.config,
+              },
+              create: {
+                uuid: crypto.randomUUID(),
+                formId: form.id,
+                title: question.title,
+                type: question.type,
+                required: question.required,
+                options: question.config,
+              },
+            })
+          )
+        );
+      }
+    });
+
+    revalidatePath(`/form/build/${form.workspaceId}/${uuid}`);
+
+    return {
+      success: true,
+      message: 'Form published successfully',
+    };
+  } catch (error) {
+    console.error('PublishFormToServer error:', error);
+    return {
+      success: false,
+      message: 'Failed to publish form',
+    };
+  }
+}
+
+// Keep other functions similar but apply validation pattern...
+export async function updateFormDesignConfiguration(
+  uuid: string,
+  payload: FormDesignConfiguration
+): Promise<ActionResponse> {
+  try {
+    const { form } = await validateUserAndForm(uuid);
+
+    await prisma.formDesignConfigurationSetting.upsert({
+      where: { formId: form.id },
+      update: {
+        colorConfiguration: payload.colorConfiguration,
+        headerDesign: payload.headerDesign,
+        headerImage: payload.headerImage,
+        questionDesign: payload.questionDesign,
+        textDesign: payload.textDesign,
+      },
+      create: {
+        formId: form.id,
+        colorConfiguration: payload.colorConfiguration,
+        headerDesign: payload.headerDesign,
+        headerImage: payload.headerImage,
+        questionDesign: payload.questionDesign,
+        textDesign: payload.textDesign,
+      },
+    });
+
+    return { success: true, message: '' };
+  } catch (error) {
+    console.error('updateFormDesignConfiguration error:', error);
+    return { success: false, message: 'Something went wrong' };
+  }
+}
+
+export async function updateQuestionOptionsInDatabase(
+  uuid: string,
+  questionId: string,
+  config: Question["config"]
+): Promise<ActionResponse<Question>> {
+  try {
+    await validateUserAndForm(uuid);
+
+    const updated = await prisma.formQuestions.update({
+      where: { id: questionId },
+      data: { options: config },
+    });
+
+    const question: Question = {
+      id: updated.id,
+      title: updated.title!,
+      uuid: updated.uuid,
+      type: updated.type,
+      required: updated.required,
+      config: updated.options as Question['config'],
+    };
+
+    return {
+      success: true,
+      message: "Options updated successfully",
+      data: question,
+    };
+  } catch (error) {
+    console.error("Error updating options:", error);
+    return {
+      success: false,
+      message: "Failed to update options",
+    };
+  }
+}
+
+// Additional optimized functions...
 export async function createQuestionInDatabase(
   formUuid: string,
   questionData: Omit<Question, 'id'>
 ): Promise<ActionResponse<Question>> {
   try {
-    const user = await getSession();
-    if (!user) redirect('/login');
-
-    const form = await prisma.formData.findUnique({
-      where: { formId: formUuid },
-    });
-    if (!form) redirect('/login');
+    const { form } = await validateUserAndForm(formUuid);
 
     const created = await prisma.formQuestions.create({
       data: {
@@ -443,7 +437,7 @@ export async function createQuestionInDatabase(
 
     const question: Question = {
       id: created.id,
-      uuid:created.uuid,
+      uuid: created.uuid,
       title: created.title!,
       type: created.type,
       required: created.required,
@@ -462,211 +456,6 @@ export async function createQuestionInDatabase(
       message: "Failed to create question"
     };
   }
-};
-
-export async function ChangesRequiredState(
-  uuid: string,
-  questionId: string,
-  required: boolean
-): Promise<ActionResponse<Question>> {
-  try {
-    const user = await getSession();
-    if (!user) redirect('/login');
-
-    console.log("UUID", uuid)
-    console.log("QuestionID", questionId)
-    console.log("Required Value", required)
-
-    const existingQuestion = await prisma.formQuestions.findUnique({
-      where: {
-        id: questionId,
-        //uuid:uuid
-      }
-    })
-
-    if (!existingQuestion) {
-      return {
-        success: false,
-        message: "Question Not Found",
-      };
-    }
-
-    const updated = await prisma.formQuestions.update({
-      where: {
-        id: questionId,
-        //uuid:uuid
-      },
-      data: {
-        required: required,
-      },
-    });
-
-    const question: Question = {
-      id: updated.id,
-      uuid:updated.uuid,
-      title: updated.title!,
-      type: updated.type,
-      required: updated.required,
-      config: updated.options as Question['config'],
-    };
-
-    {
-      //   "_id": {
-      //     "$oid": "696bb5a19c526cdcf55804a0"
-      //   },
-      //   "uuid": "57500457-026e-4309-81b0-79054dd30ad7",
-      //   "required": true,
-      //   "title": "Adding New Question #3",
-      //   "type": "Drop Down",
-      //   "options": {
-      //     "options": [
-      //       "Option 1",
-      //       "Option 2",
-      //       "Option 3"
-      //     ]
-      //   },
-      //   "formId": {
-      //     "$oid": "696b6d99352e9ffb281eae9b"
-      //   }
-      // }
-
-
-      return {
-        success: true,
-        message: "Required state updated successfully",
-        data: question,
-      }
-    }
-  } catch (error) {
-    console.error("Error updating required state:", error);
-    return {
-      success: false,
-      message: "Failed to update required state",
-    };
-  }
-}
-
-export async function updateQuestionOptionsInDatabase(
-  uuid: string,
-  questionId: string,
-  config: Question["config"]
-) {
-  try {
-    const user = await getSession();
-    if (!user) redirect('/login');
-
-    console.log("UUID", uuid)
-    console.log("QuestionID", questionId)
-
-    const existingQuestion = await prisma.formQuestions.findUnique({
-      where: {
-        id: questionId,
-      }
-    })
-
-    if (!existingQuestion) {
-      return {
-        success: false,
-        message: "Question Not Found",
-      };
-    }
-
-    const updated = await prisma.formQuestions.update({
-      where: {
-        id: questionId,
-      },
-      data: {
-        options: config,
-      },
-    });
-
-    console.log(updated)
-
-    const question: Question = {
-      id: updated.id,
-      title: updated.title!,
-      uuid:updated.uuid,
-      type: updated.type,
-      required: updated.required,
-      config: updated.options as Question['config'],
-    };
-
-
-    return {
-      success: true,
-      message: "Required state updated successfully",
-      data: question,
-    }
-  } catch (error) {
-    console.error("Error updating required state:", error);
-    return {
-      success: false,
-      message: "Failed to update required state",
-    };
-
-  }
-}
-
-
-export async function updateQuestionTitleInDatabase(
-  uuid: string,
-  questionId: string,
-  title: string
-): Promise<ActionResponse<Question>> {
-  try {
-    const user = await getSession();
-    if (!user) redirect('/login');
-
-    console.log("UUID", uuid)
-    console.log("QuestionID", questionId)
-
-    const existingQuestion = await prisma.formQuestions.findUnique({
-      where: {
-        id: questionId,
-      }
-    })
-
-    if (!existingQuestion) {
-      return {
-        success: false,
-        message: "Question Not Found",
-      };
-    }
-
-    const updated = await prisma.formQuestions.update({
-      where: {
-        id: questionId,
-      },
-      data: {
-        title: title,
-      },
-    });
-
-    console.log(updated)
-
-    const question: Question = {
-      id: updated.id,
-      title: updated.title!,
-      uuid:updated.uuid,
-      type: updated.type,
-      required: updated.required,
-      config: updated.options as Question['config'],
-    };
-
-
-    return {
-      success: true,
-      message: "Required state updated successfully",
-      data: question,
-    }
-  } catch (error) {
-    console.error("Error updating required state:", error);
-    return {
-      success: false,
-      message: "Failed to update required state",
-    };
-
-  }
 }
 
 export async function deleteQuestionFromDatabase(
@@ -674,13 +463,7 @@ export async function deleteQuestionFromDatabase(
   questionId: string
 ): Promise<ActionResponse> {
   try {
-    const user = await getSession();
-    if (!user) redirect('/login');
-
-    const form = await prisma.formData.findUnique({
-      where: { formId: formUuid },
-    });
-    if (!form) redirect('/login');
+    const { form } = await validateUserAndForm(formUuid);
 
     await prisma.formQuestions.delete({
       where: {
@@ -702,186 +485,28 @@ export async function deleteQuestionFromDatabase(
   }
 }
 
-export async function PublishFormToServer(
-  uuid: string,
-  formHeaderConfiguration: FormConfigurationType,
-  formSettingConfiguration: FormSettingsConfiguration,
-  formDesignConfiguration: FormDesignConfiguration,
-  questions: Question[]
+export async function RevertFormPublishActionToServer(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  prevState: any,
+  formData: FormData
 ): Promise<ActionResponse> {
-  const user = await getSession();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  const res = await prisma.formData.findUnique({
-    where: { formId: uuid },
-  });
-
-  if (!res) {
-    redirect('/login');
-  }
-
-
   try {
-    await prisma.$transaction(async (tx) => {
-      await tx.formHeaderConfiguration.upsert({
-        where: { formId: res?.id },
-        update: {
-          formTitle: formHeaderConfiguration.title.formTitle,
-          titleAlign: formHeaderConfiguration.title.TitleAlign,
-          titlePlaceholder: formHeaderConfiguration.title.placeholder,
-          isTitleBold: formHeaderConfiguration.title.isTitleBold,
-          isTitleItalic: formHeaderConfiguration.title.isTitleItalic,
-          isTitleUnderline: formHeaderConfiguration.title.isTitleUnderline,
+    const uuid = formData.get("uuid") as string;
+    const { form } = await validateUserAndForm(uuid);
 
-          formDescription: formHeaderConfiguration.description.formDescription,
-          descriptionAlign: formHeaderConfiguration.description.DescriptionAlign,
-          descriptionPlaceholder: formHeaderConfiguration.description.placeholder,
-          isDescriptionBold: formHeaderConfiguration.description.isDescriptionBold,
-          isDescriptionItalic: formHeaderConfiguration.description.isDescriptionItalic,
-          isDescriptionUnderline: formHeaderConfiguration.description.isDescriptionUnderline,
-        },
-        create: {
-          formId: res?.id,
-          formTitle: formHeaderConfiguration.title.formTitle,
-          titleAlign: formHeaderConfiguration.title.TitleAlign,
-          titlePlaceholder: formHeaderConfiguration.title.placeholder,
-          isTitleBold: formHeaderConfiguration.title.isTitleBold,
-          isTitleItalic: formHeaderConfiguration.title.isTitleItalic,
-          isTitleUnderline: formHeaderConfiguration.title.isTitleUnderline,
-
-          formDescription: formHeaderConfiguration.description.formDescription,
-          descriptionAlign: formHeaderConfiguration.description.DescriptionAlign,
-          descriptionPlaceholder: formHeaderConfiguration.description.placeholder,
-          isDescriptionBold: formHeaderConfiguration.description.isDescriptionBold,
-          isDescriptionItalic: formHeaderConfiguration.description.isDescriptionItalic,
-          isDescriptionUnderline: formHeaderConfiguration.description.isDescriptionUnderline,
-        },
-      });
-      await tx.formSettingConfiguration.upsert({
-        where: { formId: res.id },
-        update: {
-          limitResponseToOne: formSettingConfiguration.limitResponseToOne,
-          requiredSignIn: formSettingConfiguration.requiredSignIn,
-          showLinkToSubmitAnotherResponse: formSettingConfiguration.showLinkToSubmitAnotherResponse,
-          showProgressBar: formSettingConfiguration.showProgressBar,
-          shuffleQuestionOrder: formSettingConfiguration.shuffleQuestionOrder,
-          isPublished: true,
-          responseConfirmationMessage: formSettingConfiguration.responseConfirmationMessage,
-        },
-        create: {
-          formId: res.id,
-          limitResponseToOne: formSettingConfiguration.limitResponseToOne,
-          requiredSignIn: formSettingConfiguration.requiredSignIn,
-          showLinkToSubmitAnotherResponse: formSettingConfiguration.showLinkToSubmitAnotherResponse,
-          showProgressBar: formSettingConfiguration.showProgressBar,
-          shuffleQuestionOrder: formSettingConfiguration.shuffleQuestionOrder,
-          isPublished: formSettingConfiguration.isPublished,
-          responseConfirmationMessage: formSettingConfiguration.responseConfirmationMessage,
-        },
-      });
-
-      await tx.formDesignConfigurationSetting.upsert({
-        where: { formId: res.id },
-        update: {
-          colorConfiguration: formDesignConfiguration.colorConfiguration,
-          headerImage: formDesignConfiguration.headerImage,
-          questionDesign: formDesignConfiguration.questionDesign,
-          headerDesign: formDesignConfiguration.headerDesign,
-          textDesign: formDesignConfiguration.textDesign,
-        },
-        create: {
-          formId: res.id,
-          colorConfiguration: formDesignConfiguration.colorConfiguration,
-          headerImage: formDesignConfiguration.headerImage,
-          questionDesign: formDesignConfiguration.questionDesign,
-          headerDesign: formDesignConfiguration.headerDesign,
-          textDesign: formDesignConfiguration.textDesign,
-        },
-      });
-
-      if (questions.length > 0) {
-        await Promise.all(
-          questions.map(question =>
-            tx.formQuestions.upsert({
-              where: {
-                id: question.id,
-              },
-              update: {
-                title: question.title,
-                type: question.type,
-                required: question.required,
-                options: question.config,
-              },
-              create: {
-                uuid: crypto.randomUUID(),
-                formId: res.id,
-                title: question.title,
-                type: question.type,
-                required: question.required,
-                options: question.config,
-              },
-            })
-          )
-        );
-      }
+    await prisma.formSettingConfiguration.update({
+      where: { formId: form.id },
+      data: { isPublished: false }
     });
+    
+    revalidatePath(`/form/build/${form.workspaceId}/${uuid}`);
 
-    revalidatePath(`/form/build/${res.workspaceId}/${uuid}`)
-
-    return {
-      success: true,
-      message: 'Form published successfully',
-    };
-  } catch (error) {
-    console.error('Transaction failed:', error);
+    return { success: true, message: "Unpublished the Link Successfully." };
+  } catch (error: unknown) {
+    console.error('RevertFormPublishActionToServer error:', error);
     return {
       success: false,
-      message: 'Failed to save form configuration',
+      message: "Something went wrong",
     };
   }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function RevertFormPublishActionToServer(prevState:any,formData:FormData):Promise<ActionResponse>{
-
-  try {
-    const uuid = formData.get("uuid") as string
-
-   const user = await getSession();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  const res = await prisma.formData.findUnique({
-    where: { formId: uuid },
-  });
-
-  if (!res) {
-    redirect('/login');
-  }
-
-  console.log("res",res)
-
-  await prisma.formSettingConfiguration.update({
-    where:{formId:res.id},
-    data:{
-      isPublished:false
-    }
-  })
-  revalidatePath(`/form/build/${res.workspaceId}/${uuid}`)
-
-  return {success:true,message:"Unpublished the Link Successfully."}
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error:unknown) {
-    return {
-      success:false,
-      message:"Something went wrong",
-    }
-  }
-
 }

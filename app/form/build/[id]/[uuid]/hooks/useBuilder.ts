@@ -1,4 +1,6 @@
-import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
+import {  useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { debounce } from 'lodash';
+import { toast } from 'sonner';
 import {
   Question,
   FormConfigurationType,
@@ -16,11 +18,9 @@ import {
   INITIAL_DESIGN_CONFIG,
   INITIAL_FORM_SETTINGS,
 } from '../constants';
-import { questionConfigMap } from '../_Utils/utils';
-import { themes } from '../_Utils/utils';
+import { questionConfigMap, themes } from '../_Utils/utils';
 import { useUUIDClient } from '../_Context/UUIDClientProvider';
 import {
-  initialValuePushToDatabase,
   updateFormDesignConfiguration,
   updateFormSettingConfiguration,
   updateHeaderDescriptionConfiguration,
@@ -32,43 +32,40 @@ import {
   updateQuestionOptionsInDatabase,
   PublishFormToServer,
 } from '../_ServerActions/actions';
-import { toast } from 'sonner';
-import { UseDebouncedHook } from './useDebounce';
 import {
   mapDescriptionToPayload,
   mapDesignConfigurationtoPayload,
   mapSettingConfigurationToPayload,
   mapTitleToPayload,
 } from '../Mappers/formHeader';
-import { debounce } from 'lodash';
 
 interface UseFormBuilderProps {
-  initialData: FormResponseFromDatabase
+  initialData: FormResponseFromDatabase;
 }
 
 export const useFormBuilder = ({ initialData }: UseFormBuilderProps) => {
-  const [formName, setFormName] = useState(initialData.headerConfig?.formTitle ?? "My New Form");
+  const { currentUUID, setLoading } = useUUIDClient();
   const uuidRef = useRef<string | null>(null);
 
-  const [questions, setQuestions] = useState<Question[]>(() => {
-    if (!initialData.questions) return []
+  const [formName, setFormName] = useState(
+    initialData.headerConfig?.formTitle ?? "My New Form"
+  );
 
+  const [questions, setQuestions] = useState<Question[]>(() => {
+    if (!initialData.questions) return [];
     return initialData.questions.map(q => ({
       id: q.id,
       title: q.title ?? '',
-      uuid:q.uuid,
+      uuid: q.uuid,
       type: q.type,
-      config: q.options as QuestionConfig ?? {},
+      config: (q.options as QuestionConfig) ?? {},
       required: q.required
-    }))
+    }));
   });
-
-
 
   const [formDesignConfiguration, setFormDesignConfiguration] =
     useState<FormDesignConfiguration>(() => {
-      if (!initialData.formDesign) return INITIAL_DESIGN_CONFIG
-
+      if (!initialData.formDesign) return INITIAL_DESIGN_CONFIG;
       return {
         headerDesign: initialData.formDesign.headerDesign as { fontSelected: string; size: number },
         questionDesign: initialData.formDesign.questionDesign as { fontSelected: string; size: number },
@@ -78,12 +75,9 @@ export const useFormBuilder = ({ initialData }: UseFormBuilderProps) => {
       };
     });
 
-
-
   const [formHeaderConfiguration, setFormHeaderConfiguration] =
     useState<FormConfigurationType>(() => {
       if (!initialData?.headerConfig) return INITIAL_FORM_HEADER_CONFIG;
-
       return {
         formId: initialData.headerConfig.formId!,
         title: {
@@ -105,23 +99,22 @@ export const useFormBuilder = ({ initialData }: UseFormBuilderProps) => {
       };
     });
 
-  const [formSettingConfiguration, setFormSettingConfiguration] = useState<FormSettingsConfiguration>(() => {
-    if (!initialData?.formSettings) return INITIAL_FORM_SETTINGS;
-
-    return {
-      shuffleQuestionOrder: initialData.formSettings.shuffleQuestionOrder,
-      showProgressBar: initialData.formSettings.showProgressBar,
-      responseConfirmationMessage: initialData.formSettings.responseConfirmationMessage,
-      showLinkToSubmitAnotherResponse: initialData.formSettings.showLinkToSubmitAnotherResponse,
-      requiredSignIn: initialData.formSettings.requiredSignIn,
-      limitResponseToOne: initialData.formSettings.limitResponseToOne,
-      isPublished: initialData.formSettings.isPublished,
-    };
-  });
+  const [formSettingConfiguration, setFormSettingConfiguration] =
+    useState<FormSettingsConfiguration>(() => {
+      if (!initialData?.formSettings) return INITIAL_FORM_SETTINGS;
+      return {
+        shuffleQuestionOrder: initialData.formSettings.shuffleQuestionOrder,
+        showProgressBar: initialData.formSettings.showProgressBar,
+        responseConfirmationMessage: initialData.formSettings.responseConfirmationMessage,
+        showLinkToSubmitAnotherResponse: initialData.formSettings.showLinkToSubmitAnotherResponse,
+        requiredSignIn: initialData.formSettings.requiredSignIn,
+        limitResponseToOne: initialData.formSettings.limitResponseToOne,
+        isPublished: initialData.formSettings.isPublished,
+      };
+    });
 
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(() => {
     if (!initialData?.formDesign?.colorConfiguration) return themes[0];
-
     const config = initialData.formDesign.colorConfiguration as { color: string; background: string };
     const matchingTheme = themes.find(t => t.base === config.color);
     return matchingTheme ?? themes[0];
@@ -129,79 +122,18 @@ export const useFormBuilder = ({ initialData }: UseFormBuilderProps) => {
 
   const [selectedShade, setSelectedShade] = useState<string | null>(() => {
     if (!initialData?.formDesign?.colorConfiguration) return themes[0].shades[0];
-
     const config = initialData.formDesign.colorConfiguration as { color: string; background: string };
     return config.background ?? themes[0].shades[0];
   });
 
-
   const [newQuestionTitle, setNewQuestionTitle] = useState('');
   const [selectedTypeOfQuestion, setSelectedTypeOfQuestion] = useState('');
-
   const [isSettingSheetOpen, setSettingSheetOpen] = useState(false);
-  const [isPublished,setIsPublished] = useState<boolean>(false)
-
-
-  const { currentUUID, setLoading } = useUUIDClient();
+  const [isPublished, setIsPublished] = useState<boolean>(false);
 
   useEffect(() => {
     uuidRef.current = currentUUID;
   }, [currentUUID]);
-
-  const debounceChangesForFormTitleUpdated = UseDebouncedHook<FormTitleConfig>(
-    async (data) => {
-      setLoading(true);
-      const result = await updateHeaderTitleConfiguration(
-        uuidRef.current!,
-        data
-      );
-      setLoading(false);
-      if (result.success === false) {
-        toast.error('Something went wrong');
-      }
-    },
-    1000
-  );
-
-  const debounceChangesForFormDescriptionUpdated =
-    UseDebouncedHook<FormDescriptionConfig>(async (data) => {
-      setLoading(true);
-      const result = await updateHeaderDescriptionConfiguration(
-        uuidRef.current!,
-        data
-      );
-      setLoading(false);
-      if (result.success === false) {
-        toast.error('Something went wrong');
-      }
-    });
-
-  const debounceChangesForFormDesignConfigurationUpdated =
-    UseDebouncedHook<FormDesignConfiguration>(async (data) => {
-      setLoading(true);
-      const result = await updateFormDesignConfiguration(
-        uuidRef.current!,
-        data
-      );
-      setLoading(false);
-      if (result.success === false) {
-        toast.error('Something went wrong');
-      }
-    });
-
-
-  const debounceChangesForFormSettingConfigurationUpdated =
-    UseDebouncedHook<FormSettingsConfiguration>(async (data) => {
-      setLoading(true)
-
-
-      const result = await updateFormSettingConfiguration(uuidRef.current!, data)
-      setLoading(false)
-      if (result.success === false) {
-        toast.error("Something went wrong.")
-      }
-    })
-
 
   const debouncedUpdateTitle = useMemo(
     () => debounce(async (
@@ -211,18 +143,14 @@ export const useFormBuilder = ({ initialData }: UseFormBuilderProps) => {
       previousTitle: string
     ) => {
       setLoading(true);
-      const result = await updateQuestionTitleInDatabase(
-        formUUID,
-        questionId,
-        title
-      );
+      const result = await updateQuestionTitleInDatabase(formUUID, questionId, title);
       setLoading(false);
 
       if (result.success && result.data) {
         setQuestions((prev) =>
           prev.map((q) => (q.id === questionId ? result.data! : q))
         );
-        toast.success("Title updated successfully");
+        toast.success("Title updated");
       } else {
         setQuestions((prev) =>
           prev.map((q) =>
@@ -231,23 +159,18 @@ export const useFormBuilder = ({ initialData }: UseFormBuilderProps) => {
         );
         toast.error(result.message || "Failed to update title");
       }
-    }, 1000),
+    }, 2000),
     [setLoading]
   );
 
-  const debounceUpdateForOptions = useMemo(
+  const debouncedUpdateOptions = useMemo(
     () => debounce(async (
-      formUUID:string,
-      id:string,
-      t:Question["config"],      
+      formUUID: string,
+      id: string,
+      config: Question["config"],
     ) => {
-       setLoading(true);
-
-      const result = await updateQuestionOptionsInDatabase(uuidRef.current!,
-        id,
-        t
-      );
-
+      setLoading(true);
+      const result = await updateQuestionOptionsInDatabase(formUUID, id, config);
       setLoading(false);
 
       if (result.success && result.data) {
@@ -255,218 +178,199 @@ export const useFormBuilder = ({ initialData }: UseFormBuilderProps) => {
           prev.map((q) => (q.id === id ? result.data! : q))
         );
       } else {
-        setQuestions((prev) =>
-          prev.map((q) =>
-            q.id === id ? { ...q, config: t } : q
-          )
-        );
         toast.error(result.message || "Failed to update options");
       }
-    },1000),
+    }, 1500), // Increased from 1000ms
     [setLoading]
-  )
+  );
+
+  const debouncedUpdateTitleConfig = useMemo(
+    () => debounce(async (uuid: string, data: FormTitleConfig) => {
+      setLoading(true);
+      const result = await updateHeaderTitleConfiguration(uuid, data);
+      setLoading(false);
+      if (!result.success) {
+        toast.error('Failed to update title');
+      }
+    }, 2000), // Increased debounce time
+    [setLoading]
+  );
+
+  const debouncedUpdateDescriptionConfig = useMemo(
+    () => debounce(async (uuid: string, data: FormDescriptionConfig) => {
+      setLoading(true);
+      const result = await updateHeaderDescriptionConfiguration(uuid, data);
+      setLoading(false);
+      if (!result.success) {
+        toast.error('Failed to update description');
+      }
+    }, 2000),
+    [setLoading]
+  );
+
+  const debouncedUpdateDesignConfig = useMemo(
+    () => debounce(async (uuid: string, data: FormDesignConfiguration) => {
+      setLoading(true);
+      const result = await updateFormDesignConfiguration(uuid, data);
+      setLoading(false);
+      if (!result.success) {
+        toast.error('Failed to update design');
+      }
+    }, 2000),
+    [setLoading]
+  );
+
+  const debouncedUpdateSettingConfig = useMemo(
+    () => debounce(async (uuid: string, data: FormSettingsConfiguration) => {
+      setLoading(true);
+      const result = await updateFormSettingConfiguration(uuid, data);
+      setLoading(false);
+      if (!result.success) {
+        toast.error('Failed to update settings');
+      }
+    }, 2000),
+    [setLoading]
+  );
+
 
   useEffect(() => {
     return () => {
       debouncedUpdateTitle.cancel();
-      debounceUpdateForOptions.cancel()
+      debouncedUpdateOptions.cancel();
+      debouncedUpdateTitleConfig.cancel();
+      debouncedUpdateDescriptionConfig.cancel();
+      debouncedUpdateDesignConfig.cancel();
+      debouncedUpdateSettingConfig.cancel();
     };
-  }, [debouncedUpdateTitle,debounceUpdateForOptions]);
-
-
-
-
-  useEffect(() => {
-    if (!currentUUID) return;
-
-    startTransition(async () => {
-      setLoading(true);
-
-      const result = await initialValuePushToDatabase(
-        currentUUID,
-        formHeaderConfiguration,
-        formSettingConfiguration,
-        formDesignConfiguration
-      );
-
-      setLoading(false);
-
-      if (!result.success) {
-        toast.error(result.message);
-      }
-    });
   }, [
-    currentUUID,
-    formDesignConfiguration,
-    formHeaderConfiguration,
-    formSettingConfiguration,
-    questions,
-    setLoading,
+    debouncedUpdateTitle,
+    debouncedUpdateOptions,
+    debouncedUpdateTitleConfig,
+    debouncedUpdateDescriptionConfig,
+    debouncedUpdateDesignConfig,
+    debouncedUpdateSettingConfig
   ]);
 
-  const updateFormChanges = <K extends keyof FormConfigurationType['title']>(
+  const updateFormChanges = useCallback(<K extends keyof FormConfigurationType['title']>(
     key: K,
     value: FormConfigurationType['title'][K]
   ) => {
     setFormHeaderConfiguration((prev) => {
       const updated = {
         ...prev,
-        title: {
-          ...prev.title,
-          [key]: value,
-        },
+        title: { ...prev.title, [key]: value },
       };
-
-      startTransition(async () => {
-        debounceChangesForFormTitleUpdated.current?.(
-          mapTitleToPayload(updated)
-        );
-        setLoading(false);
-      });
+      debouncedUpdateTitleConfig(uuidRef.current!, mapTitleToPayload(updated));
       return updated;
     });
-  };
+  }, [debouncedUpdateTitleConfig]);
 
-const updateDescriptionFormChanges = <
-    K extends keyof FormConfigurationType['description'],
-  >(
+  const updateDescriptionFormChanges = useCallback(<K extends keyof FormConfigurationType['description']>(
     key: K,
     value: FormConfigurationType['description'][K]
   ) => {
     setFormHeaderConfiguration((prev) => {
       const updated = {
         ...prev,
-        description: {
-          ...prev.description,
-          [key]: value,
-        },
+        description: { ...prev.description, [key]: value },
       };
-
-      startTransition(async () => {
-        debounceChangesForFormDescriptionUpdated.current?.(
-          mapDescriptionToPayload(updated)
-        );
-      });
+      debouncedUpdateDescriptionConfig(uuidRef.current!, mapDescriptionToPayload(updated));
       return updated;
     });
-  };
+  }, [debouncedUpdateDescriptionConfig]);
 
-
-const addQuestion = async () => {
+  const addQuestion = useCallback(async () => {
     if (!selectedTypeOfQuestion || !newQuestionTitle.trim()) {
-      alert('Please enter a question title and select a type');
+      toast.error('Please enter a question title and select a type');
       return;
     }
 
     const questionData: Omit<Question, 'id'> = {
       title: newQuestionTitle,
-      uuid:"",
+      uuid: "",
       type: selectedTypeOfQuestion,
       config: questionConfigMap[selectedTypeOfQuestion] || {},
       required: false,
     };
 
-    startTransition(async () => {
-      setLoading(true);
-      const result = await createQuestionInDatabase(uuidRef.current!, questionData);
-      setLoading(false);
+    setLoading(true);
+    const result = await createQuestionInDatabase(uuidRef.current!, questionData);
+    setLoading(false);
 
-      if (result.success && result.data) {
-        setQuestions((prev) => [...prev, result.data!]);
-        setNewQuestionTitle('');
-        setSelectedTypeOfQuestion('');
-        toast.success('Question added');
-      } else {
-        toast.error(result.message || 'Failed to add question');
-      }
-    });
-  };
+    if (result.success && result.data) {
+      setQuestions((prev) => [...prev, result.data!]);
+      setNewQuestionTitle('');
+      setSelectedTypeOfQuestion('');
+      toast.success('Question added');
+    } else {
+      toast.error(result.message || 'Failed to add question');
+    }
+  }, [selectedTypeOfQuestion, newQuestionTitle, setLoading]);
 
-const updateQuestionTitle = (id: string, title: string) => {
+  const updateQuestionTitle = useCallback((id: string, title: string) => {
     const question = questions.find(q => q.id === id);
-
     if (!question) {
       toast.error("Question not found");
       return;
     }
 
     const previousTitle = question.title;
-
-
     setQuestions((prev) =>
       prev.map((q) => (q.id === id ? { ...q, title } : q))
     );
+    debouncedUpdateTitle(uuidRef.current!, id, title, previousTitle);
+  }, [questions, debouncedUpdateTitle]);
 
-    debouncedUpdateTitle(
-      uuidRef.current!,
-      id,
-      title,
-      previousTitle
-    );
-};
-
-  const updateQuestionRequired = (id: string, required: boolean) => {
+  const updateQuestionRequired = useCallback(async (id: string, required: boolean) => {
     const previousQuestion = questions.find(q => q.id === id);
-
     if (!previousQuestion) {
       toast.error("Question not found");
       return;
     }
 
-    console.log("Id", id)
-
     const previousRequired = previousQuestion.required;
-
     setQuestions((prev) =>
       prev.map((q) => (q.id === id ? { ...q, required } : q))
     );
 
-    startTransition(async () => {
-      setLoading(true);
+    setLoading(true);
+    const result = await ChangesRequiredState(uuidRef.current!, id, required);
+    setLoading(false);
 
-      const result = await ChangesRequiredState(uuidRef.current!,
-        id,
-        required, // Your upsert already handles this
+    if (result.success && result.data) {
+      setQuestions((prev) =>
+        prev.map((q) => (q.id === id ? result.data! : q))
       );
+      toast.success("Updated");
+    } else {
+      setQuestions((prev) =>
+        prev.map((q) =>
+          q.id === id ? { ...q, required: previousRequired } : q
+        )
+      );
+      toast.error(result.message || "Failed to update");
+    }
+  }, [questions, setLoading]);
 
-      setLoading(false);
-
-      if (result.success && result.data) {
-        setQuestions((prev) =>
-          prev.map((q) => (q.id === id ? result.data! : q))
-        );
-        toast.success(result.message)
-      } else {
-        setQuestions((prev) =>
-          prev.map((q) =>
-            q.id === id ? { ...q, required: previousRequired } : q
-          )
-        );
-        toast.error(result.message || "Failed to update question");
-      }
-    });
-  };
-
-  const deleteQuestion = async (id: string) => {
+  const deleteQuestion = useCallback(async (id: string) => {
+    const deletedQuestion = questions.find(q => q.id === id);
     setQuestions((prev) => prev.filter((q) => q.id !== id));
-    startTransition(async () => {
-      setLoading(true);
-      const result = await deleteQuestionFromDatabase(uuidRef.current!, id);
-      setLoading(false);
 
-      if (result.success === false) {
-        toast.error("Failed to delete question");
-        const deletedQuestion = questions.find(q => q.id === id);
-        if (deletedQuestion) {
-          setQuestions((prev) => [...prev, deletedQuestion]);
-        }
-      } else {
-        toast.success("Question deleted");
+    setLoading(true);
+    const result = await deleteQuestionFromDatabase(uuidRef.current!, id);
+    setLoading(false);
+
+    if (!result.success) {
+      toast.error("Failed to delete question");
+      if (deletedQuestion) {
+        setQuestions((prev) => [...prev, deletedQuestion]);
       }
-    });
-  };
+    } else {
+      toast.success("Question deleted");
+    }
+  }, [questions, setLoading]);
 
-  const duplicateQuestion = async (id: string) => {
+  const duplicateQuestion = useCallback(async (id: string) => {
     const questionToDuplicate = questions.find((q) => q.id === id);
     if (!questionToDuplicate) return;
 
@@ -475,25 +379,22 @@ const updateQuestionTitle = (id: string, title: string) => {
       type: questionToDuplicate.type,
       config: { ...questionToDuplicate.config },
       required: questionToDuplicate.required,
-      uuid:""
+      uuid: ""
     };
 
-    startTransition(async () => {
-      setLoading(true);
-      const result = await createQuestionInDatabase(uuidRef.current!, newQuestion);
-      setLoading(false);
+    setLoading(true);
+    const result = await createQuestionInDatabase(uuidRef.current!, newQuestion);
+    setLoading(false);
 
-      if (result.success && result.data) {
-        setQuestions((prev) => [...prev, result.data!]);
-        toast.success("Question duplicated");
-      } else {
-        toast.error("Failed to duplicate question");
-      }
-    });
-  };
+    if (result.success && result.data) {
+      setQuestions((prev) => [...prev, result.data!]);
+      toast.success("Question duplicated");
+    } else {
+      toast.error("Failed to duplicate question");
+    }
+  }, [questions, setLoading]);
 
-
-  const updateQuestionOptions = (id: string, options: string[]) => {
+  const updateQuestionOptions = useCallback((id: string, options: string[]) => {
     const question = questions.find(q => q.id === id);
     if (!question) return;
 
@@ -503,16 +404,14 @@ const updateQuestionTitle = (id: string, title: string) => {
       )
     );
 
-    startTransition(async () => {
-     debounceUpdateForOptions(
+    debouncedUpdateOptions(
       uuidRef.current!,
       id,
-      {...question.config,options}
-     )
-    });
-  };
+      { ...question.config, options }
+    );
+  }, [questions, debouncedUpdateOptions]);
 
-  const updateDesignConfiguration = (
+  const updateDesignConfiguration = useCallback((
     fontValue: string | undefined,
     sizeValue: number | undefined,
     key: 'fontSelected' | 'size',
@@ -527,18 +426,12 @@ const updateQuestionTitle = (id: string, title: string) => {
           ...(sizeValue !== undefined && { size: sizeValue }),
         },
       };
-
-      startTransition(async () =>
-        debounceChangesForFormDesignConfigurationUpdated.current?.(
-          mapDesignConfigurationtoPayload(updated)
-        )
-      );
-
+      debouncedUpdateDesignConfig(uuidRef.current!, mapDesignConfigurationtoPayload(updated));
       return updated;
     });
-  };
+  }, [debouncedUpdateDesignConfig]);
 
-  const updateFormSettingChanges = (
+  const updateFormSettingChanges = useCallback((
     key:
       | 'shuffleQuestionOrder'
       | 'showProgressBar'
@@ -548,57 +441,32 @@ const updateQuestionTitle = (id: string, title: string) => {
       | 'limitResponseToOne',
     value: boolean | string
   ) => {
-
     setFormSettingConfiguration((prev) => {
-      const updated = {
-        ...prev,
-        [key]: value
-      }
-
-      startTransition(() => (
-        debounceChangesForFormSettingConfigurationUpdated.current?.(mapSettingConfigurationToPayload(updated))
-      ))
-
-
+      const updated = { ...prev, [key]: value };
+      debouncedUpdateSettingConfig(uuidRef.current!, mapSettingConfigurationToPayload(updated));
       return updated;
-    })
+    });
+  }, [debouncedUpdateSettingConfig]);
 
+  const handlePublishEvent = useCallback(async () => {
+    setLoading(true);
+    const result = await PublishFormToServer(
+      uuidRef.current!,
+      formHeaderConfiguration,
+      formSettingConfiguration,
+      formDesignConfiguration,
+      questions
+    );
 
+    if (result.success) {
+      toast.success(result.message);
+    } else {
+      toast.error(result.message);
+    }
+    setLoading(false);
+  }, [formHeaderConfiguration, formSettingConfiguration, formDesignConfiguration, questions, setLoading]);
 
-    console.log(formSettingConfiguration);
-  };
-
-  const handlePublishEvent = () => {
-    
-    startTransition(async () => {
-      setLoading(true)
-      
-      const result = await PublishFormToServer(
-        uuidRef.current!,
-        formHeaderConfiguration,
-        formSettingConfiguration,
-        formDesignConfiguration,
-        questions
-      )
-
-      if(result.success === false){
-        toast.error(result.message)
-      }
-
-      if(result.success){
-        toast.success(result.message)
-      }
-      setLoading(false)
-    })
-
-  };
-
-  const handleDesignChanges = () => {
-    console.log(selectedShade, selectedTheme);
-    console.log(formDesignConfiguration);
-  };
-
-  const handleThemeSelection = (theme: Theme) => {
+  const handleThemeSelection = useCallback((theme: Theme) => {
     setSelectedTheme(theme);
     setFormDesignConfiguration((prev) => {
       const updated = {
@@ -609,20 +477,14 @@ const updateQuestionTitle = (id: string, title: string) => {
           background: theme.shades[0],
         },
       };
-      startTransition(() => {
-        debounceChangesForFormDesignConfigurationUpdated.current?.(
-          mapDesignConfigurationtoPayload(updated)
-        );
-      });
+      debouncedUpdateDesignConfig(uuidRef.current!, mapDesignConfigurationtoPayload(updated));
       return updated;
     });
-
     setSelectedShade(theme.shades[0]);
-  };
+  }, [debouncedUpdateDesignConfig]);
 
-  const handleShadeSelection = (shade: string) => {
+  const handleShadeSelection = useCallback((shade: string) => {
     setSelectedShade(shade);
-
     setFormDesignConfiguration((prev) => {
       const updated = {
         ...prev,
@@ -631,14 +493,10 @@ const updateQuestionTitle = (id: string, title: string) => {
           background: shade,
         },
       };
-      startTransition(() => {
-        debounceChangesForFormDesignConfigurationUpdated.current?.(
-          mapDesignConfigurationtoPayload(updated)
-        );
-      });
+      debouncedUpdateDesignConfig(uuidRef.current!, mapDesignConfigurationtoPayload(updated));
       return updated;
     });
-  };
+  }, [debouncedUpdateDesignConfig]);
 
   return {
     formName,
@@ -651,9 +509,7 @@ const updateQuestionTitle = (id: string, title: string) => {
     selectedTypeOfQuestion,
     setSelectedTypeOfQuestion,
     selectedTheme,
-    setSelectedTheme,
     selectedShade,
-    setSelectedShade,
     updateFormChanges,
     updateDescriptionFormChanges,
     addQuestion,
@@ -664,11 +520,9 @@ const updateQuestionTitle = (id: string, title: string) => {
     updateQuestionOptions,
     updateDesignConfiguration,
     handlePublishEvent,
-    handleDesignChanges,
     isSettingSheetOpen,
     setSettingSheetOpen,
     updateFormSettingChanges,
-    setFormSettingConfiguration,
     formSettingConfiguration,
     handleThemeSelection,
     handleShadeSelection,
