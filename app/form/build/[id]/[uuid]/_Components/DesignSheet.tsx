@@ -38,7 +38,7 @@ interface DesignSheetProps {
   ) => void;
   onThemeSelect: (theme: Theme) => void;
   onShadeSelect: (shade: string) => void;
-  onSave: () => void;
+  //onSave: () => void;
   uuid:string,
   handleThemeSelection:(theme:Theme) => void;
   handleShadeSelection:(shade:string) => void
@@ -53,7 +53,7 @@ export const DesignSheet = ({
   onUpdateDesign,
   onThemeSelect,
   onShadeSelect,
-  onSave,
+  //onSave,
   handleThemeSelection,
   handleShadeSelection,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

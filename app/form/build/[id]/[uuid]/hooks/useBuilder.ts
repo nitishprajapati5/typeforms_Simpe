@@ -527,6 +527,10 @@ export const useFormBuilder = ({ initialData }: UseFormBuilderProps) => {
     handleThemeSelection,
     handleShadeSelection,
     isPublished,
-    setIsPublished
+    setIsPublished,
+    setSelectedShade,
+    setSelectedTheme,
+
+
   };
 };

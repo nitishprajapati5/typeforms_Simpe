@@ -70,7 +70,6 @@ export default function UUIDClient({uuid,data}:UUIDClientProps) {
     updateQuestionOptions,
     updateDesignConfiguration,
     handlePublishEvent,
-    handleDesignChanges,
     isSettingSheetOpen,
     setSettingSheetOpen,
     updateFormSettingChanges,
@@ -153,7 +152,7 @@ export default function UUIDClient({uuid,data}:UUIDClientProps) {
         onUpdateDesign={updateDesignConfiguration}
         onThemeSelect={setSelectedTheme}
         onShadeSelect={setSelectedShade}
-        onSave={handleDesignChanges}
+        //onSave={handleDesignChanges}
         handleShadeSelection={handleShadeSelection}
         handleThemeSelection={handleThemeSelection}
       />
