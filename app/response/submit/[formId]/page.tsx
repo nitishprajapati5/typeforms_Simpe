@@ -8,7 +8,7 @@ interface formIdProps {
 export default async function SubmitPage({ params }: formIdProps) {
   const { formId } = await params;
 
-  const isSubmittedUpdation = await prisma.responseFromUser.update({
+  await prisma.responseFromUser.update({
     where: {
       formId: formId,
     },
