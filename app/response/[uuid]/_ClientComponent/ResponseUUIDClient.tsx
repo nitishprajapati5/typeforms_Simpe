@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import {
   FormResponseFromDatabase,
   JsonValue,
   QuestionConfig,
 } from '@/app/form/build/[id]/[uuid]/types';
+import { submitFormResponse } from '../_ServerComponents/actions';
 
 interface ColorConfig {
   color: string;
@@ -29,14 +30,52 @@ interface Question {
 
 interface ResponseClientProps {
   data: FormResponseFromDatabase;
+  formId: string;
 }
 
-export default function ResponsePreviewClient({ data }: ResponseClientProps) {
+export default function ResponsePreviewClient({
+  data,
+  formId,
+}: ResponseClientProps) {
   const [formValues, setFormValues] = useState<
     Record<string, string | string[]>
   >({});
+  const [isPending, startTransition] = useTransition();
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: 'success' | 'error' | null;
+    message: string;
+  }>({ type: null, message: '' });
 
-  console.log(data);
+  // Submit handler using Server Action
+  const handleSubmit = async () => {
+    setSubmitStatus({ type: null, message: '' });
+
+    startTransition(async () => {
+      try {
+        const result = await submitFormResponse(formId, formValues);
+
+        if (result.success) {
+          setSubmitStatus({
+            type: 'success',
+            message: result.message,
+          });
+          // Optional: Clear form after successful submission
+          // setFormValues({});
+        } else {
+          setSubmitStatus({
+            type: 'error',
+            message: result.message || 'Failed to submit form',
+          });
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        setSubmitStatus({
+          type: 'error',
+          message: 'An unexpected error occurred',
+        });
+      }
+    });
+  };
 
   // Helper to safely extract nested JSON values
   const getColorConfig = (): ColorConfig => {
@@ -79,8 +118,6 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
     const questionType = question.type;
     const options = question.options as QuestionConfig;
 
-    console.log(typeof options);
-
     // Text-based input fields
     if (
       ['Text Field', 'Email Field', 'Number Field', 'URL Field'].includes(
@@ -96,6 +133,7 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
           onChange={(e) =>
             setFormValues({ ...formValues, [question.id]: e.target.value })
           }
+          disabled={isPending}
         />
       );
     }
@@ -111,6 +149,7 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
           onChange={(e) =>
             setFormValues({ ...formValues, [question.id]: e.target.value })
           }
+          disabled={isPending}
         />
       );
     }
@@ -128,6 +167,7 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
           onChange={(e) =>
             setFormValues({ ...formValues, [question.id]: e.target.value })
           }
+          disabled={isPending}
         />
       );
     }
@@ -142,6 +182,7 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
           onChange={(e) =>
             setFormValues({ ...formValues, [question.id]: e.target.value })
           }
+          disabled={isPending}
         />
       );
     }
@@ -149,7 +190,6 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
     // Dropdown select
     if (questionType === 'Drop Down') {
       const dropdownOptions = options?.options || [];
-      console.log(dropdownOptions);
       return (
         <select
           className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
@@ -157,6 +197,7 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
           onChange={(e) =>
             setFormValues({ ...formValues, [question.id]: e.target.value })
           }
+          disabled={isPending}
         >
           <option value="">Choose an option</option>
           {dropdownOptions.map((option: string, idx: number) => (
@@ -169,33 +210,22 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
     }
 
     function normalizeOptions(options: unknown): string[] {
-      // If it's already an array, return it
       if (Array.isArray(options)) {
         return options;
       }
-
-      // If it's an object with nested 'options' property
       if (typeof options === 'object' && options !== null) {
         const opts = options as { options?: string[] };
         if (opts.options && Array.isArray(opts.options)) {
           return opts.options;
         }
-        // Fallback to Object.values if structure is different
         return Object.values(options);
       }
-
       return [];
     }
 
     // Radio buttons
     if (questionType === 'Radio Buttons') {
-      if (question.options) {
-        console.log(typeof question.options);
-      }
       const radioOptions = normalizeOptions(question.options);
-      console.log(radioOptions.length);
-      console.log(formValues);
-
       return (
         <div className="flex flex-col space-y-2">
           {radioOptions.map((option: string, idx: number) => (
@@ -212,6 +242,7 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
                   })
                 }
                 className="h-4 w-4 text-blue-600"
+                disabled={isPending}
               />
               <span className="text-gray-700">{option}</span>
             </label>
@@ -222,9 +253,6 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
 
     // Checkboxes
     if (questionType === 'Check Boxes') {
-      // const checkboxOptions = (
-      //   Array.isArray(question.options) ? question.options : []
-      // ) as string[];
       const currentValues = (
         Array.isArray(formValues[question.id]) ? formValues[question.id] : []
       ) as string[];
@@ -248,6 +276,7 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
                   });
                 }}
                 className="h-4 w-4 rounded text-blue-600"
+                disabled={isPending}
               />
               <span className="text-gray-700">{option}</span>
             </label>
@@ -256,7 +285,6 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
       );
     }
 
-    // Default fallback
     return (
       <input
         type="text"
@@ -266,14 +294,13 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
         onChange={(e) =>
           setFormValues({ ...formValues, [question.id]: e.target.value })
         }
+        disabled={isPending}
       />
     );
   };
 
   return (
     <div className="min-h-screen w-full bg-gray-50">
-      {/* Preview Header */}
-
       <main className="mx-auto max-w-3xl px-4 py-8">
         <div className="rounded-2xl bg-white shadow-md overflow-hidden">
           {data.formDesign && (
@@ -334,15 +361,41 @@ export default function ResponsePreviewClient({ data }: ResponseClientProps) {
               ))}
             </div>
 
-            <div className="mt-8 flex justify-start">
+            {submitStatus.message && (
+              <div
+                className={`mt-6 rounded-lg p-4 ${
+                  submitStatus.type === 'success'
+                    ? 'bg-green-50 text-green-800 border border-green-200'
+                    : 'bg-red-50 text-red-800 border border-red-200'
+                }`}
+              >
+                {submitStatus.message}
+              </div>
+            )}
+
+            <div className="mt-8 flex justify-start gap-4">
               <button
-                className="rounded-lg px-8 py-3 font-medium text-white transition-colors hover:opacity-90"
+                onClick={handleSubmit}
+                disabled={isPending}
+                className="rounded-lg px-8 py-3 font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: getColorConfig().color || '#1A73E8',
                 }}
               >
-                Submit
+                {isPending ? 'Submitting...' : 'Submit'}
               </button>
+
+              {submitStatus.type === 'success' && (
+                <button
+                  onClick={() => {
+                    setFormValues({});
+                    setSubmitStatus({ type: null, message: '' });
+                  }}
+                  className="rounded-lg px-8 py-3 font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  Submit Another Response
+                </button>
+              )}
             </div>
           </div>
         </div>

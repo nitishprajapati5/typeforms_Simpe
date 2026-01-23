@@ -354,10 +354,16 @@ export const useFormBuilder = ({ initialData }: UseFormBuilderProps) => {
 
   const deleteQuestion = useCallback(async (id: string) => {
     const deletedQuestion = questions.find(q => q.id === id);
+    if (!deletedQuestion?.uuid) {
+      toast.error("Question UUID not found");
+      return;
+    }
+
     setQuestions((prev) => prev.filter((q) => q.id !== id));
 
     setLoading(true);
-    const result = await deleteQuestionFromDatabase(uuidRef.current!, id);
+    console.log(id)
+    const result = await deleteQuestionFromDatabase(uuidRef.current!, id, deletedQuestion.uuid);
     setLoading(false);
 
     if (!result.success) {

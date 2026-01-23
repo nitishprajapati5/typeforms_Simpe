@@ -38,7 +38,7 @@ const data = await prisma.formData.findUnique({
 if(!data){
   redirect("/login")
 }
-  console.log("data from backend",data)
+  //console.log("data from backend",data)
 
   return (
     <UUIDClient 

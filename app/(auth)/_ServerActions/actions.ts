@@ -21,6 +21,17 @@ export async function login(
 ): Promise<ActionResponse> {
   const email = String(formData.get('email') || '');
   const password = String(formData.get('password') || '');
+  const isFormResponse = String(formData.get('isFormResponse') || '');
+  const uuid = String(formData.get('uuid') || '');
+
+  console.log('isFormResponse', isFormResponse);
+
+  if (uuid === 'null') {
+    return {
+      success: false,
+      message: 'Form is Invalid',
+    };
+  }
 
   if (!email || !password) {
     return {
@@ -63,8 +74,11 @@ export async function login(
     path: '/',
     maxAge: 60 * 60 * 24 * 7,
   });
-
-  redirect('/workspace/home');
+  if (isFormResponse === 'true') {
+    redirect(`/response/${uuid}`);
+  } else {
+    redirect('/workspace/home');
+  }
 }
 
 export async function signup(

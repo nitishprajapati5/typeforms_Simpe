@@ -33,6 +33,7 @@ model User {
   createdAt DateTime @default(now())
   workSpace WorkSpaceSection[]
   formData FormData[]
+  formResponse ResponseFromUser?
 }
 
 model WorkSpaceSection {
@@ -65,6 +66,7 @@ model FormData {
   formSettings FormSettingConfiguration?
   formDesign FormDesignConfigurationSetting?
   headerConfig FormHeaderConfiguration?
+  responsefromUsers ResponseFromUser[]
 
 
   @@map("forms")
@@ -135,4 +137,33 @@ model FormDesignConfigurationSetting{
   headerImage String?
   questionDesign Json
   textDesign Json
+}
+
+model ResponseFromUser {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  formId   String @unique @db.ObjectId
+  form     FormData @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  userId String @unique @db.ObjectId
+  User User @relation(fields: [userId],references: [id],onDelete:Cascade)
+
+  response Json?
+  
+  ipAddress String?
+  submittedAt DateTime @default(now())
+  isSubmitted Boolean @default(false)
+}
+
+
+model FileUpload {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  questionId   String
+  fileName     String
+  fileUrl      String
+  fileSize     Int?
+  mimeType     String?
+  uploadedAt   DateTime @default(now())
+
+  @@map("file_uploads")
 }

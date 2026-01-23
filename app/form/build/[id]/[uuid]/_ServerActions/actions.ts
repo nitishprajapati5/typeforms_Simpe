@@ -459,15 +459,16 @@ export async function createQuestionInDatabase(
 
 export async function deleteQuestionFromDatabase(
   formUuid: string,
-  questionId: string
+  questionId: string,
+  questionUUID:string
 ): Promise<ActionResponse> {
   try {
-    const { form } = await validateUserAndForm(formUuid);
+    //const { form } = await validateUserAndForm(formUuid);
 
     await prisma.formQuestions.delete({
       where: {
-        uuid: questionId,
-        formId: form.id,
+        uuid: questionUUID,
+        //formId: form.id,
       },
     });
 
