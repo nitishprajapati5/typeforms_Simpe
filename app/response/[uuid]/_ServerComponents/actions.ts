@@ -79,6 +79,11 @@ export async function submitFormResponse(
         userId: session.id,
       },
     });
+
+    return {
+      success: true,
+      message: 'Form Submitted!',
+    };
   } catch (error) {
     console.error('Error submitting form:', error);
     return {
