@@ -2,7 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import Image from 'next/image';
 import { login } from '../_ServerActions/actions';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useActionState } from 'react';
