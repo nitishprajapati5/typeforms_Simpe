@@ -96,7 +96,7 @@ export async function signup(
   }
 
   const existingUser = await prisma.user.findUnique({ where: { email } });
-
+  console.log(existingUser);
   if (existingUser) {
     if (existingUser.provider === 'GOOGLE') {
       return {

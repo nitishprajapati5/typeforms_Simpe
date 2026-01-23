@@ -37,6 +37,11 @@ export const getWorkSpaceForms = async ({
             isPublished: true,
           },
         },
+        responsefromUsers: {
+          select: {
+            isSubmitted: true,
+          },
+        },
       },
     }),
     prisma.formData.count({

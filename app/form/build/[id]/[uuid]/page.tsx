@@ -10,14 +10,16 @@ interface UUIDPageProps {
 export default async function UUIDPage({params}:UUIDPageProps){
   const {uuid} = await params;
 
+  console.log(uuid)
+
   const getWorkSpaceId = await prisma.formData.findUnique({
     where:{
-      formId:uuid
+      id:uuid
     }
   })
 
 
-  console.log(getWorkSpaceId?.id)
+  console.log("Getting Workspace ID",getWorkSpaceId?.id)
 
   if(!getWorkSpaceId){
     redirect("/login")
@@ -25,7 +27,7 @@ export default async function UUIDPage({params}:UUIDPageProps){
 
 const data = await prisma.formData.findUnique({
   where: {
-    formId: uuid 
+    id: uuid 
   },
   include: {
     formDesign: true,

@@ -12,4 +12,7 @@ export type TworkSpaceFormDetail = {
   formSettings: {
     isPublished: boolean;
   } | null;
+  responsefromUsers: {
+    isSubmitted: boolean;
+  }[];
 };

@@ -1,9 +1,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Edit2, Trash2 } from 'lucide-react';
+import { ArrowRight, Edit2, Trash2 } from 'lucide-react';
 import { TworkSpaceFormDetails } from '../../types/TworkSpaceFormDetail';
 import { ServerPagination } from './ServerPagination';
 import { Badge } from '@/components/ui/badge';
+import { useRouter } from 'next/navigation';
 
 type Props = {
   forms: TworkSpaceFormDetails;
@@ -18,6 +19,9 @@ export const WorkSpaceFormsTable = ({
   totalPages,
   workspaceId,
 }: Props) => {
+  const router = useRouter();
+
+  console.log(forms);
   if (!forms || forms.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-12">
@@ -43,6 +47,12 @@ export const WorkSpaceFormsTable = ({
             <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">
               Form Name
             </th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground justify-center">
+              Total Response{"'"}s
+            </th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground justify-center">
+              View Responses{"'"}s
+            </th>
             <th className="px-6 py-3 text-left text-sm font-semibold text-muted-foreground">
               Actions
             </th>
@@ -66,10 +76,35 @@ export const WorkSpaceFormsTable = ({
                   </span>
                 </td>
 
+                <td className="px-6 py-4  gap-2 ">
+                  <div className="flex justify-start gap-4">
+                    {form.responsefromUsers.length}
+                  </div>
+                </td>
+
+                <td
+                  className="px-6 py-4"
+                  onClick={() => router.push(`/viewresponses/${form.id}`)}
+                >
+                  {form.responsefromUsers.length > 0 ? (
+                    <>
+                      {' '}
+                      <div className="flex flex-row gap-2 cursor-pointer">
+                        View
+                        <ArrowRight className="animate-bounce" />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p>-</p>
+                    </>
+                  )}
+                </td>
+
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-4">
                     <Link
-                      href={`/form/build/${form.workspaceId}/${form.formId}`}
+                      href={`/form/build/${form.workspaceId}/${form.id}`}
                       className="text-primary hover:opacity-80"
                     >
                       <Edit2 size={16} />

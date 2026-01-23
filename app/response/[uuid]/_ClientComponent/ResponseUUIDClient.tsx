@@ -7,6 +7,7 @@ import {
   QuestionConfig,
 } from '@/app/form/build/[id]/[uuid]/types';
 import { submitFormResponse } from '../_ServerComponents/actions';
+import { useRouter } from 'next/navigation';
 
 interface ColorConfig {
   color: string;
@@ -40,6 +41,7 @@ export default function ResponsePreviewClient({
   const [formValues, setFormValues] = useState<
     Record<string, string | string[]>
   >({});
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [submitStatus, setSubmitStatus] = useState<{
     type: 'success' | 'error' | null;
@@ -53,14 +55,13 @@ export default function ResponsePreviewClient({
     startTransition(async () => {
       try {
         const result = await submitFormResponse(formId, formValues);
+        console.log(result);
 
-        if (result.success) {
-          setSubmitStatus({
-            type: 'success',
-            message: result.message,
-          });
-          // Optional: Clear form after successful submission
-          // setFormValues({});
+        console.log(result);
+
+        if (result.success === true) {
+          //redirect(`/response/submit/${formId}`)
+          router.push(`/response/submit/${formId}`);
         } else {
           setSubmitStatus({
             type: 'error',
@@ -69,10 +70,10 @@ export default function ResponsePreviewClient({
         }
       } catch (error) {
         console.error('Error submitting form:', error);
-        setSubmitStatus({
-          type: 'error',
-          message: 'An unexpected error occurred',
-        });
+        // setSubmitStatus({
+        //   type: 'error',
+        //   message: 'An unexpected error occurred',
+        // });
       }
     });
   };

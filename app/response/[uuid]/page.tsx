@@ -13,7 +13,7 @@ export default async function ResponseForm({ params }: DynamicUUIDForPreview) {
 
   const data = await prisma.formData.findUnique({
     where: {
-      formId: uuid,
+      id: uuid,
     },
     include: {
       formDesign: true,
@@ -42,7 +42,7 @@ export default async function ResponseForm({ params }: DynamicUUIDForPreview) {
     },
   });
 
-  if (data.formSettings?.limitResponseToOne === true && hasUserFilledTheForm) {
+  if (hasUserFilledTheForm) {
     redirect('/response/submitted');
   }
 

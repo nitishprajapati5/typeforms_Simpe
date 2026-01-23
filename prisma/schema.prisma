@@ -23,7 +23,7 @@ model User {
 
   // OAuth
   provider AuthProvider @default(CREDENTIALS)
-  googleId String?   @unique
+  googleId String?  
 
   //Magic Link
   magicToken String?
@@ -142,7 +142,7 @@ model FormDesignConfigurationSetting{
 model ResponseFromUser {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  formId   String @unique @db.ObjectId
+  formId   String @db.ObjectId
   form     FormData @relation(fields: [formId], references: [id], onDelete: Cascade)
 
   userId String @unique @db.ObjectId

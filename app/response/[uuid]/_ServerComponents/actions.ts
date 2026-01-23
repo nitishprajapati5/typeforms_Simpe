@@ -70,7 +70,7 @@ export async function submitFormResponse(
     }
 
     await prisma.responseFromUser.update({
-      where: { formId: formId },
+      where: { formId: formId, userId: session.id },
       data: {
         formId,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,8 +92,6 @@ export async function submitFormResponse(
       error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
-
-  redirect(`/response/submit/${formId}`);
 }
 
 export async function getFormResponses(
