@@ -215,7 +215,6 @@ export async function updateQuestionTitleInDatabase(
   }
 }
 
-// 🚀 OPTIMIZATION 7: Batch question updates in publish
 export async function PublishFormToServer(
   uuid: string,
   formHeaderConfiguration: FormConfigurationType,
@@ -227,7 +226,6 @@ export async function PublishFormToServer(
     const { form } = await validateUserAndForm(uuid);
 
     await prisma.$transaction(async (tx) => {
-      // Batch all upserts in parallel where possible
       await Promise.all([
         tx.formHeaderConfiguration.upsert({
           where: { formId: form.id },
@@ -305,11 +303,13 @@ export async function PublishFormToServer(
         }),
       ]);
 
-      // Update questions in batches
-      if (questions.length > 0) {
+     
+    });
+
+     if (questions.length > 0) {
         await Promise.all(
           questions.map(question =>
-            tx.formQuestions.upsert({
+            prisma.formQuestions.upsert({
               where: { id: question.id },
               update: {
                 title: question.title,
@@ -329,7 +329,6 @@ export async function PublishFormToServer(
           )
         );
       }
-    });
 
     revalidatePath(`/form/build/${form.workspaceId}/${uuid}`);
 
