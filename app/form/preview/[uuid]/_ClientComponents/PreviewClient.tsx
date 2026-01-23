@@ -80,6 +80,8 @@ export default function PreviewClient({ data }: PreviewClientProps) {
     const questionType = question.type;
     const options = question.options as QuestionConfig;
 
+    console.log(typeof options);
+
     // Text-based input fields
     if (
       ['Text Field', 'Email Field', 'Number Field', 'URL Field'].includes(
@@ -148,6 +150,7 @@ export default function PreviewClient({ data }: PreviewClientProps) {
     // Dropdown select
     if (questionType === 'Drop Down') {
       const dropdownOptions = options?.options || [];
+      console.log(dropdownOptions);
       return (
         <select
           className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
@@ -166,13 +169,36 @@ export default function PreviewClient({ data }: PreviewClientProps) {
       );
     }
 
+    function normalizeOptions(options: unknown): string[] {
+      // If it's already an array, return it
+      if (Array.isArray(options)) {
+        return options;
+      }
+
+      // If it's an object with nested 'options' property
+      if (typeof options === 'object' && options !== null) {
+        const opts = options as { options?: string[] };
+        if (opts.options && Array.isArray(opts.options)) {
+          return opts.options;
+        }
+        // Fallback to Object.values if structure is different
+        return Object.values(options);
+      }
+
+      return [];
+    }
+
     // Radio buttons
     if (questionType === 'Radio Buttons') {
-      const radioOptions = (
-        Array.isArray(question.options) ? question.options : []
-      ) as string[];
+      if (question.options) {
+        console.log(typeof question.options);
+      }
+      const radioOptions = normalizeOptions(question.options);
+      console.log(radioOptions.length);
+      console.log(formValues);
+
       return (
-        <div className="space-y-2">
+        <div className="flex flex-col space-y-2">
           {radioOptions.map((option: string, idx: number) => (
             <label key={idx} className="flex items-center gap-3 cursor-pointer">
               <input
@@ -197,15 +223,17 @@ export default function PreviewClient({ data }: PreviewClientProps) {
 
     // Checkboxes
     if (questionType === 'Check Boxes') {
-      const checkboxOptions = (
-        Array.isArray(question.options) ? question.options : []
-      ) as string[];
+      // const checkboxOptions = (
+      //   Array.isArray(question.options) ? question.options : []
+      // ) as string[];
       const currentValues = (
         Array.isArray(formValues[question.id]) ? formValues[question.id] : []
       ) as string[];
 
+      const checkboxOptions = normalizeOptions(question.options);
+
       return (
-        <div className="space-y-2">
+        <div className="space-y-2 flex flex-col">
           {checkboxOptions.map((option: string, idx: number) => (
             <label key={idx} className="flex items-center gap-3 cursor-pointer">
               <input
