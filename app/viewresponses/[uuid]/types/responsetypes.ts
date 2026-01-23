@@ -21,3 +21,13 @@ export interface ViewResponsesClientProps {
   submittedResponse: UserResponse[];
   dates: DateCount[];
 }
+
+export interface PaginationInfo {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export type UserResponses = UserResponse[];
+export type QuestionAnswers = QuestionAnswer[];

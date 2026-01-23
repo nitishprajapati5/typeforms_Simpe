@@ -2,30 +2,10 @@
 
 import { Users, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-
-interface QuestionAnswer {
-  questionTitle: string | null;
-  answer: string | string[] | null;
-}
-
-interface UserResponse {
-  responseId: string;
-  user: string;
-  email: string;
-  submittedAt: Date;
-  isSubmitted: boolean;
-  questions: QuestionAnswer[];
-}
-
-interface PaginationInfo {
-  page: number;
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
-}
+import { PaginationInfo, UserResponses } from '../types/responsetypes';
 
 interface ViewResponsesClientProps {
-  submittedResponse: UserResponse[];
+  submittedResponse: UserResponses;
   pagination: PaginationInfo;
 }
 

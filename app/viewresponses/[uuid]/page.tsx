@@ -1,28 +1,10 @@
 import prisma from '@/app/_DatabaseConfiguration/dbConfig';
 import ViewResponsesClient from './_ClientComponents/ViewResponsesClient';
+import { QuestionAnswers, UserResponses } from './types/responsetypes';
 
 interface ViewResponsesFormProps {
   params: Promise<{ uuid: string }>;
-  searchParams: Promise<{ page?: string }>; // Fixed: removed = sign
-}
-
-interface QuestionAnswer {
-  questionTitle: string | null;
-  answer: string | string[] | null;
-}
-
-interface UserResponse {
-  responseId: string;
-  user: string;
-  email: string;
-  submittedAt: Date;
-  isSubmitted: boolean;
-  questions: QuestionAnswer[];
-}
-
-interface DateCount {
-  day: string;
-  responses: number;
+  searchParams: Promise<{ page?: string }>;
 }
 
 export default async function ViewResponsesForm({
@@ -34,40 +16,6 @@ export default async function ViewResponsesForm({
 
   const page = parseInt(pageParam || '1');
   const pageSize = 5;
-
-  type DatesWithCount = Record<string, number>;
-
-  const allResponses = await prisma.responseFromUser.findMany({
-    select: {
-      submittedAt: true,
-    },
-  });
-
-  const datesWithCount: DatesWithCount = allResponses.reduce(
-    (acc, response) => {
-      const dateKey = response.submittedAt.toISOString().split('T')[0];
-      acc[dateKey] = (acc[dateKey] || 0) + 1;
-      return acc;
-    },
-    {} as DatesWithCount
-  );
-
-  const latestFourChronological: DateCount[] = Object.entries(datesWithCount)
-    .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
-    .slice(0, 4)
-    .reverse()
-    .map(([date, count]) => {
-      const dateObj = new Date(date);
-      const month = dateObj.toLocaleDateString('en-US', { month: 'short' });
-      const day = dateObj.getDate();
-
-      return {
-        day: `${month} ${day}`,
-        responses: count,
-      };
-    });
-
-  console.log(latestFourChronological);
 
   const userFormResponses = await prisma.responseFromUser.findMany({
     where: {
@@ -93,19 +41,18 @@ export default async function ViewResponsesForm({
     },
   });
 
-  // Get total count for pagination
   const totalCount = await prisma.responseFromUser.count({
     where: {
       formId: uuid,
     },
   });
 
-  const answersWithQuestions: UserResponse[] = userFormResponses.map(
+  const answersWithQuestions: UserResponses = userFormResponses.map(
     (userFormResponse) => {
       const responseData =
         (userFormResponse.response as Record<string, string | string[]>) || {};
 
-      const questionsWithAnswers: QuestionAnswer[] =
+      const questionsWithAnswers: QuestionAnswers =
         userFormResponse.form.questions.map((question) => ({
           questionTitle: question.title,
           answer: responseData[question.id] || null,
