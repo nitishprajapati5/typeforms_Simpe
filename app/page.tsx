@@ -1,12 +1,13 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { FormIcon } from 'lucide-react';
+import { FormIcon, Github } from 'lucide-react';
 import Image from 'next/image';
 import { easeInOut, motion } from 'framer-motion';
 import TypewriterLoop from './_ClientComponents/TypewriterText';
 import AnimatedFormIcon from './_ClientComponents/FormRotating';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Home() {
   const router = useRouter();
@@ -60,6 +61,14 @@ export default function Home() {
           <Button size="lg" className="flex items-center gap-2 shadow-lg">
             <Image src="/google_icon.png" alt="Google" width={16} height={16} />
             <span className="hidden sm:inline">Google</span>
+          </Button>
+          <Button className="cursor-pointer">
+            <Link
+              href={'https://github.com/nitishprajapati5/typeforms_Simpe'}
+              target="_blank"
+            >
+              <Github />
+            </Link>
           </Button>
         </div>
       </header>
