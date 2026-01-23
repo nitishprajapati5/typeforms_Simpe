@@ -69,7 +69,7 @@ export default function Login() {
           <Loader2 className="animate-spin w-full items-center" />
         )}
 
-        <Button type="button" className="flex gap-2">
+        {/* <Button type="button" className="flex gap-2">
           <Image
             src="/google_icon.png"
             width={20}
@@ -77,7 +77,7 @@ export default function Login() {
             alt="Google Login"
           />
           Login with Google
-        </Button>
+        </Button> */}
 
         <Button type="button" onClick={() => router.push('/magic-link')}>
           Login with Magic Link

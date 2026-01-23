@@ -45,12 +45,12 @@ export default function Signup() {
         )}
         {!pending ? (
           <Button type="submit" className="mt-4">
-            Login
+            Sign Up
           </Button>
         ) : (
           <Loader2 className="animate-spin w-full items-center" />
         )}
-        <Button className="cursor-pointer">
+        {/* <Button className="cursor-pointer">
           <Image
             src="/google_icon.png"
             width={20}
@@ -58,7 +58,7 @@ export default function Signup() {
             alt="Google Login"
           />
           Sign Up with Google
-        </Button>
+        </Button> */}
         <Button
           variant="ghost"
           className="cursor-pointer"
