@@ -32,7 +32,7 @@ model User {
   createdAt DateTime @default(now())
   workSpace WorkSpaceSection[]
   formData FormData[]
-  formResponse ResponseFromUser?
+  formResponse ResponseFromUser[]
 }
 
 model WorkSpaceSection {
