@@ -22,8 +22,7 @@ model User {
   password  String? 
 
   // OAuth
-  provider AuthProvider @default(CREDENTIALS)
-  googleId String?  
+  provider String?
 
   //Magic Link
   magicToken String?
